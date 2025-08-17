@@ -105,14 +105,14 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm w-[85vw] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md w-[90vw]">
         <DialogHeader>
           <DialogTitle>Nova Categoria</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-1">
-            <Label htmlFor="category-name" className="text-sm">Nome da Categoria</Label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="category-name">Nome da Categoria</Label>
             <Input
               id="category-name"
               placeholder="Ex: Educação, Saúde, etc."
@@ -120,80 +120,77 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
               onChange={(e) => setName(e.target.value)}
               data-testid="input-category-name"
               autoFocus
-              className="h-9"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-sm">Ícone</Label>
-              <Select value={icon} onValueChange={setIcon}>
-                <SelectTrigger data-testid="select-category-icon" className="h-9">
-                  <SelectValue>
+          <div className="space-y-2">
+            <Label>Ícone</Label>
+            <Select value={icon} onValueChange={setIcon}>
+              <SelectTrigger data-testid="select-category-icon">
+                <SelectValue>
+                  <div className="flex items-center">
+                    {getIconComponent(icon)}
+                    <span className="ml-2">{icon}</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {availableIcons.map((iconName) => (
+                  <SelectItem key={iconName} value={iconName}>
                     <div className="flex items-center">
-                      {getIconComponent(icon)}
-                      <span className="ml-2 text-xs">{icon}</span>
+                      {getIconComponent(iconName)}
+                      <span className="ml-2">{iconName}</span>
                     </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {availableIcons.map((iconName) => (
-                    <SelectItem key={iconName} value={iconName}>
-                      <div className="flex items-center">
-                        {getIconComponent(iconName)}
-                        <span className="ml-2 text-xs">{iconName}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-sm">Cor</Label>
-              <div className="grid grid-cols-4 gap-1">
-                {availableColors.slice(0, 8).map((colorOption) => (
-                  <button
-                    key={colorOption}
-                    type="button"
-                    className={`w-6 h-6 rounded-full border-2 ${
-                      color === colorOption ? "border-white" : "border-gray-600"
-                    }`}
-                    style={{ backgroundColor: colorOption }}
-                    onClick={() => setColor(colorOption)}
-                    data-testid={`color-option-${colorOption}`}
-                  />
+                  </SelectItem>
                 ))}
-              </div>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cor</Label>
+            <div className="grid grid-cols-5 gap-2">
+              {availableColors.map((colorOption) => (
+                <button
+                  key={colorOption}
+                  type="button"
+                  className={`w-8 h-8 rounded-full border-2 ${
+                    color === colorOption ? "border-white" : "border-gray-600"
+                  }`}
+                  style={{ backgroundColor: colorOption }}
+                  onClick={() => setColor(colorOption)}
+                  data-testid={`color-option-${colorOption}`}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="space-y-1">
-            <Label className="text-sm">Pré-visualização</Label>
+          <div className="space-y-2">
+            <Label>Pré-visualização</Label>
             <div className="flex items-center space-x-2 p-2 bg-dark-surface rounded-lg">
               <div 
-                className="w-6 h-6 rounded-full flex items-center justify-center"
+                className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: `${color}20`, color }}
               >
                 {getIconComponent(icon)}
               </div>
-              <span className="text-white text-sm">{name || "Nome da categoria"}</span>
+              <span className="text-white">{name || "Nome da categoria"}</span>
             </div>
           </div>
 
-          <div className="flex space-x-2 pt-3">
+          <div className="flex space-x-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="flex-1 h-9"
+              className="flex-1"
               data-testid="button-cancel-category"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="flex-1 h-9"
+              className="flex-1"
               disabled={createCategoryMutation.isPending}
               data-testid="button-save-category"
             >
@@ -203,31 +200,25 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
         </form>
 
         {categories.length > 0 && (
-          <div className="border-t pt-3 mt-3">
-            <Label className="text-xs font-medium text-text-secondary">Categorias Existentes</Label>
-            <div className="grid grid-cols-3 gap-1 mt-2">
-              {categories.slice(0, 6).map((category) => (
+          <div className="border-t pt-4 mt-4">
+            <Label className="text-sm font-medium">Categorias Existentes</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center space-x-1 p-1 bg-dark-surface rounded text-center"
+                  className="flex items-center space-x-2 p-2 bg-dark-surface rounded-lg"
                   data-testid={`existing-category-${category.id}`}
-                  title={category.name}
                 >
                   <div 
-                    className="w-4 h-4 rounded-full flex items-center justify-center"
+                    className="w-6 h-6 rounded-full flex items-center justify-center"
                     style={{ backgroundColor: `${category.color}20`, color: category.color }}
                   >
                     {getIconComponent(category.icon)}
                   </div>
-                  <span className="text-xs text-white truncate">{category.name}</span>
+                  <span className="text-sm text-white truncate">{category.name}</span>
                 </div>
               ))}
             </div>
-            {categories.length > 6 && (
-              <p className="text-xs text-text-secondary mt-1 text-center">
-                +{categories.length - 6} mais
-              </p>
-            )}
           </div>
         )}
       </DialogContent>
