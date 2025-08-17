@@ -10,6 +10,7 @@ import { formatCurrency } from "@/lib/currency";
 import { Search, MoreVertical, Edit, Trash2, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { TransactionModal } from "@/components/transaction-modal";
 import * as Icons from "lucide-react";
 
 interface TransactionsProps {
@@ -20,11 +21,8 @@ interface TransactionsProps {
 export function Transactions({ onEditTransaction, onAddTransaction }: TransactionsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
-
-  useEffect(() => {
-    console.log("Transactions component props:", { onEditTransaction, onAddTransaction });
-    console.log("onAddTransaction type:", typeof onAddTransaction);
-  }, [onEditTransaction, onAddTransaction]);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -104,12 +102,8 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
         <Button 
           onClick={() => {
             console.log("Nova Transação button clicked");
-            // Call the global function directly
-            if ((window as any).openTransactionModal) {
-              (window as any).openTransactionModal();
-            } else {
-              console.error("openTransactionModal function not found on window");
-            }
+            setEditingTransaction(null);
+            setIsTransactionModalOpen(true);
           }}
           className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           data-testid="button-add-transaction-page"
@@ -220,7 +214,10 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
                     <DropdownMenuContent className="bg-dark-surface border-gray-700" align="end">
                       <DropdownMenuItem 
                         className="text-white hover:bg-gray-700 cursor-pointer"
-                        onClick={() => onEditTransaction(transaction)}
+                        onClick={() => {
+                          setEditingTransaction(transaction);
+                          setIsTransactionModalOpen(true);
+                        }}
                         data-testid={`button-edit-transaction-${transaction.id}`}
                       >
                         <Edit className="w-4 h-4 mr-2" />
@@ -279,6 +276,13 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
           ))
         )}
       </div>
+
+      {/* Transaction Modal */}
+      <TransactionModal
+        open={isTransactionModalOpen}
+        onOpenChange={setIsTransactionModalOpen}
+        editTransaction={editingTransaction}
+      />
     </div>
   );
 }
