@@ -34,6 +34,10 @@ A comprehensive personal finance management application built with React, TypeSc
 ✓ **IMPROVED: Floating action button** - Changed to dropdown menu with multiple quick actions
 ✓ **ENHANCED: Dropdown styling** - Made Nova Transação more prominent with better visual hierarchy
 ✓ **OPTIMIZED: Category modal** - Reduced size and improved layout with compact grid design
+✓ **IMPROVED: Dropdown actions** - Each option now directly opens the creation modal instead of just navigating
+✓ **ENHANCED: Visual design** - Added gradients, shadows, and hover effects to all dropdown options
+✓ **ADDED: Step-by-step category creation** - Split into Etapa 1 (nome) and Etapa 2 (ícone e cor)
+✓ **INCREASED: Nova Transação emphasis** - Larger size, bold text, gradient background, and prominent positioning
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

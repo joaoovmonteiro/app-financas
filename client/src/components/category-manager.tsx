@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,11 +25,19 @@ const availableColors = [
 
 interface CategoryManagerProps {
   trigger?: React.ReactNode;
+  forceOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function CategoryManager({ trigger }: CategoryManagerProps) {
-  const [open, setOpen] = useState(false);
+export function CategoryManager({ trigger, forceOpen = false, onClose }: CategoryManagerProps) {
+  const [open, setOpen] = useState(forceOpen);
   const [step, setStep] = useState(1); // 1: name, 2: icon & color
+
+  useEffect(() => {
+    if (forceOpen) {
+      setOpen(true);
+    }
+  }, [forceOpen]);
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Coffee");
   const [color, setColor] = useState("#FF9800");
@@ -105,6 +113,9 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
     setName("");
     setIcon("Coffee");
     setColor("#FF9800");
+    if (onClose) {
+      onClose();
+    }
   };
 
   const getIconComponent = (iconName: string) => {
@@ -113,7 +124,12 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      setOpen(newOpen);
+      if (!newOpen && onClose) {
+        onClose();
+      }
+    }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" data-testid="button-add-category">

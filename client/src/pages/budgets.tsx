@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,19 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Lightbulb } from "lucide-react";
 
-export function Budgets() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+interface BudgetsProps {
+  shouldOpenModal?: boolean;
+  onModalClose?: () => void;
+}
+
+export function Budgets({ shouldOpenModal = false, onModalClose }: BudgetsProps) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(shouldOpenModal);
+
+  useEffect(() => {
+    if (shouldOpenModal) {
+      setIsCreateModalOpen(true);
+    }
+  }, [shouldOpenModal]);
   const [budgetName, setBudgetName] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
   const [budgetCategoryId, setBudgetCategoryId] = useState("");
@@ -180,7 +191,12 @@ export function Budgets() {
       {/* Budget Categories */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Orçamentos por Categoria</h3>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
+          setIsCreateModalOpen(open);
+          if (!open && onModalClose) {
+            onModalClose();
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-accent-purple text-white" data-testid="button-create-budget">
               <Plus className="w-4 h-4 mr-2" />

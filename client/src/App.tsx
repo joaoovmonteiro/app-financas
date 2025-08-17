@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { useKeyboardDismiss } from "@/hooks/use-keyboard-dismiss";
 import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import { TransactionModal } from "@/components/transaction-modal";
+
+import { CategoryManager } from "@/components/category-manager";
 import { Dashboard } from "@/pages/dashboard";
 import { Transactions } from "@/pages/transactions";
 import { Budgets } from "@/pages/budgets";
@@ -20,6 +22,8 @@ import { Transaction } from "@shared/schema";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   // Enable keyboard dismissal on touch outside
@@ -44,12 +48,12 @@ function App() {
       case "transactions":
         return <Transactions onEditTransaction={handleEditTransaction} />;
       case "budgets":
-        return <Budgets />;
+        return <Budgets shouldOpenModal={isBudgetModalOpen} onModalClose={() => setIsBudgetModalOpen(false)} />;
 
       case "statistics":
         return <Statistics />;
       case "settings":
-        return <Settings />;
+        return <Settings shouldOpenCategoryModal={isCategoryModalOpen} onCategoryModalClose={() => setIsCategoryModalOpen(false)} />;
       default:
         return <Dashboard />;
     }
@@ -98,35 +102,49 @@ function App() {
               <DropdownMenuContent 
                 side="top" 
                 align="end" 
-                className="mb-2 bg-dark-surface border border-gray-700 rounded-xl shadow-xl min-w-[180px]"
+                className="mb-2 bg-dark-surface border border-gray-700 rounded-xl shadow-xl min-w-[220px] p-2"
                 data-testid="dropdown-add-menu"
               >
                 <DropdownMenuItem 
                   onClick={() => setIsTransactionModalOpen(true)}
-                  className="hover:bg-accent-purple/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-gradient-to-r from-accent-purple/20 to-accent-purple/10 border border-accent-purple/40 shadow-lg"
+                  className="hover:bg-accent-purple/40 text-white cursor-pointer px-5 py-4 rounded-xl m-1 bg-gradient-to-r from-accent-purple/30 to-accent-purple/15 border-2 border-accent-purple/50 shadow-xl transform hover:scale-105 transition-all duration-200"
                   data-testid="menu-add-transaction"
                 >
-                  <Receipt className="w-5 h-5 mr-3 text-accent-purple" />
+                  <Receipt className="w-6 h-6 mr-4 text-accent-purple" />
                   <div className="flex flex-col">
-                    <span className="font-bold text-accent-purple text-sm">Nova Transação</span>
-                    <span className="text-xs text-accent-purple/80">Adicionar receita ou gasto</span>
+                    <span className="font-extrabold text-accent-purple text-base">Nova Transação</span>
+                    <span className="text-sm text-accent-purple/90 font-medium">Adicionar receita ou gasto</span>
                   </div>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem 
-                  onClick={() => setActiveTab("budgets")}
-                  className="hover:bg-dark-primary text-white cursor-pointer px-4 py-2 rounded-lg m-1"
+                  onClick={() => {
+                    setActiveTab("budgets");
+                    setIsBudgetModalOpen(true);
+                  }}
+                  className="hover:bg-income-green/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-gradient-to-r from-income-green/20 to-income-green/10 border border-income-green/40 shadow-lg transform hover:scale-105 transition-all duration-200"
                   data-testid="menu-add-budget"
                 >
-                  <Target className="w-4 h-4 mr-3 text-income-green" />
-                  <span>Novo Orçamento</span>
+                  <Target className="w-5 h-5 mr-3 text-income-green" />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-income-green text-sm">Novo Orçamento</span>
+                    <span className="text-xs text-income-green/80">Definir limite de gastos</span>
+                  </div>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem 
-                  onClick={() => setActiveTab("settings")}
-                  className="hover:bg-dark-primary text-white cursor-pointer px-4 py-2 rounded-lg m-1"
+                  onClick={() => {
+                    setActiveTab("settings");
+                    setIsCategoryModalOpen(true);
+                  }}
+                  className="hover:bg-warning-yellow/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-gradient-to-r from-warning-yellow/20 to-warning-yellow/10 border border-warning-yellow/40 shadow-lg transform hover:scale-105 transition-all duration-200"
                   data-testid="menu-add-category"
                 >
-                  <FolderPlus className="w-4 h-4 mr-3 text-warning-yellow" />
-                  <span>Nova Categoria</span>
+                  <FolderPlus className="w-5 h-5 mr-3 text-warning-yellow" />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-warning-yellow text-sm">Nova Categoria</span>
+                    <span className="text-xs text-warning-yellow/80">Organizar transações</span>
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -140,6 +158,8 @@ function App() {
               onOpenChange={handleCloseModal}
               editTransaction={editingTransaction}
             />
+
+
           </div>
 
           <Toaster />
