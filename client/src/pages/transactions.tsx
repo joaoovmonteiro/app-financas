@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,11 @@ interface TransactionsProps {
 export function Transactions({ onEditTransaction, onAddTransaction }: TransactionsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
+
+  useEffect(() => {
+    console.log("Transactions component props:", { onEditTransaction, onAddTransaction });
+    console.log("onAddTransaction type:", typeof onAddTransaction);
+  }, [onEditTransaction, onAddTransaction]);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
