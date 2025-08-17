@@ -29,6 +29,7 @@ interface CategoryManagerProps {
 
 export function CategoryManager({ trigger }: CategoryManagerProps) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1); // 1: name, 2: icon & color
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Coffee");
   const [color, setColor] = useState("#FF9800");
@@ -64,6 +65,7 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
       setName("");
       setIcon("Coffee");
       setColor("#FF9800");
+      setStep(1);
       setOpen(false);
     },
     onError: (error: Error) => {
@@ -78,16 +80,31 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast({
-        title: "Nome obrigatório",
-        description: "Por favor, insira um nome para a categoria.",
-        variant: "destructive",
-      });
-      return;
+    if (step === 1) {
+      if (!name.trim()) {
+        toast({
+          title: "Nome obrigatório",
+          description: "Por favor, insira um nome para a categoria.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setStep(2);
+    } else {
+      createCategoryMutation.mutate({ name: name.trim(), icon, color });
     }
+  };
 
-    createCategoryMutation.mutate({ name: name.trim(), icon, color });
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setStep(1);
+    setName("");
+    setIcon("Coffee");
+    setColor("#FF9800");
   };
 
   const getIconComponent = (iconName: string) => {
@@ -105,98 +122,122 @@ export function CategoryManager({ trigger }: CategoryManagerProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md w-[90vw]">
+      <DialogContent className="sm:max-w-xs w-[85vw]">
         <DialogHeader>
-          <DialogTitle>Nova Categoria</DialogTitle>
+          <DialogTitle>Nova Categoria - Etapa {step} de 2</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="category-name">Nome da Categoria</Label>
-            <Input
-              id="category-name"
-              placeholder="Ex: Educação, Saúde, etc."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              data-testid="input-category-name"
-              autoFocus
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Ícone</Label>
-            <Select value={icon} onValueChange={setIcon}>
-              <SelectTrigger data-testid="select-category-icon">
-                <SelectValue>
-                  <div className="flex items-center">
-                    {getIconComponent(icon)}
-                    <span className="ml-2">{icon}</span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {availableIcons.map((iconName) => (
-                  <SelectItem key={iconName} value={iconName}>
-                    <div className="flex items-center">
-                      {getIconComponent(iconName)}
-                      <span className="ml-2">{iconName}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Cor</Label>
-            <div className="grid grid-cols-5 gap-2">
-              {availableColors.map((colorOption) => (
-                <button
-                  key={colorOption}
-                  type="button"
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    color === colorOption ? "border-white" : "border-gray-600"
-                  }`}
-                  style={{ backgroundColor: colorOption }}
-                  onClick={() => setColor(colorOption)}
-                  data-testid={`color-option-${colorOption}`}
+          {step === 1 ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="category-name">Nome da Categoria</Label>
+                <Input
+                  id="category-name"
+                  placeholder="Ex: Educação, Saúde, etc."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  data-testid="input-category-name"
+                  autoFocus
                 />
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Pré-visualização</Label>
-            <div className="flex items-center space-x-2 p-2 bg-dark-surface rounded-lg">
-              <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: `${color}20`, color }}
-              >
-                {getIconComponent(icon)}
               </div>
-              <span className="text-white">{name || "Nome da categoria"}</span>
-            </div>
-          </div>
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="flex-1"
+                  data-testid="button-cancel-category"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  data-testid="button-next-step"
+                >
+                  Próximo
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>Ícone</Label>
+                <Select value={icon} onValueChange={setIcon}>
+                  <SelectTrigger data-testid="select-category-icon">
+                    <SelectValue>
+                      <div className="flex items-center">
+                        {getIconComponent(icon)}
+                        <span className="ml-2">{icon}</span>
+                      </div>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableIcons.map((iconName) => (
+                      <SelectItem key={iconName} value={iconName}>
+                        <div className="flex items-center">
+                          {getIconComponent(iconName)}
+                          <span className="ml-2">{iconName}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="flex space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="flex-1"
-              data-testid="button-cancel-category"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={createCategoryMutation.isPending}
-              data-testid="button-save-category"
-            >
-              {createCategoryMutation.isPending ? "Salvando..." : "Criar"}
-            </Button>
-          </div>
+              <div className="space-y-2">
+                <Label>Cor</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  {availableColors.map((colorOption) => (
+                    <button
+                      key={colorOption}
+                      type="button"
+                      className={`w-8 h-8 rounded-full border-2 ${
+                        color === colorOption ? "border-white" : "border-gray-600"
+                      }`}
+                      style={{ backgroundColor: colorOption }}
+                      onClick={() => setColor(colorOption)}
+                      data-testid={`color-option-${colorOption}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pré-visualização</Label>
+                <div className="flex items-center space-x-2 p-2 bg-dark-surface rounded-lg">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${color}20`, color }}
+                  >
+                    {getIconComponent(icon)}
+                  </div>
+                  <span className="text-white">{name}</span>
+                </div>
+              </div>
+
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1"
+                  data-testid="button-back-step"
+                >
+                  Voltar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={createCategoryMutation.isPending}
+                  data-testid="button-save-category"
+                >
+                  {createCategoryMutation.isPending ? "Salvando..." : "Criar"}
+                </Button>
+              </div>
+            </>
+          )}
         </form>
 
         {categories.length > 0 && (
