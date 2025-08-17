@@ -14,7 +14,7 @@ import * as Icons from "lucide-react";
 
 interface TransactionsProps {
   onEditTransaction: (transaction: Transaction) => void;
-  onAddTransaction: () => void;
+  onAddTransaction?: () => void;
 }
 
 export function Transactions({ onEditTransaction, onAddTransaction }: TransactionsProps) {
@@ -104,15 +104,9 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
         <Button 
           onClick={() => {
             console.log("Nova Transação button clicked");
-            console.log("onAddTransaction:", onAddTransaction);
-            if (onAddTransaction && typeof onAddTransaction === 'function') {
-              onAddTransaction();
-            } else {
-              console.error("onAddTransaction is not a function:", onAddTransaction);
-              // Fallback: trigger the modal directly if possible
-              const addTransactionEvent = new CustomEvent('openTransactionModal');
-              window.dispatchEvent(addTransactionEvent);
-            }
+            // Use the same approach as the floating action button
+            const addTransactionEvent = new CustomEvent('openTransactionModal');
+            window.dispatchEvent(addTransactionEvent);
           }}
           className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           data-testid="button-add-transaction-page"
