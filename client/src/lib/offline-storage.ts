@@ -19,58 +19,8 @@ const defaultCategories: Category[] = [
   { id: "cat-outros", name: "Outros", icon: "more-horizontal", color: "#757575", userId: "default-user" }
 ];
 
-const defaultTransactions: Transaction[] = [
-  {
-    id: "tx-1",
-    amount: "5000.00",
-    description: "Salário Mensal",
-    type: "income",
-    categoryId: "cat-5",
-    userId: "default-user",
-    date: new Date("2025-08-01"),
-    tags: null
-  },
-  {
-    id: "tx-2",
-    amount: "1200.00",
-    description: "Supermercado mensal",
-    type: "expense",
-    categoryId: "cat-1",
-    userId: "default-user",
-    date: new Date("2025-08-05"),
-    tags: null
-  },
-  {
-    id: "tx-3",
-    amount: "450.00",
-    description: "Uber e transporte",
-    type: "expense",
-    categoryId: "cat-2",
-    userId: "default-user",
-    date: new Date("2025-08-10"),
-    tags: null
-  },
-  {
-    id: "tx-4",
-    amount: "300.00",
-    description: "Cinema e restaurantes",
-    type: "expense",
-    categoryId: "cat-3",
-    userId: "default-user",
-    date: new Date("2025-08-15"),
-    tags: null
-  },
-  {
-    id: "tx-5",
-    amount: "800.00",
-    description: "Conta de luz e água",
-    type: "expense",
-    categoryId: "cat-4",
-    userId: "default-user",
-    date: new Date("2025-08-20"),
-    tags: null
-  }
-];
+// Start with clean app - no sample transactions
+const defaultTransactions: Transaction[] = [];
 
 export class OfflineStorage {
   private initialized = false;
@@ -83,7 +33,12 @@ export class OfflineStorage {
     if (!isInitialized) {
       localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(defaultCategories));
       localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify(defaultTransactions));
+      localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify([]));
+      localStorage.setItem(STORAGE_KEYS.goals, JSON.stringify([]));
       localStorage.setItem(STORAGE_KEYS.initialized, 'true');
+      console.log("🚀 OfflineStorage initialized with clean data");
+    } else {
+      console.log("📱 OfflineStorage already initialized");
     }
     
     this.initialized = true;
@@ -100,11 +55,13 @@ export class OfflineStorage {
     const categories = await this.getCategories();
     const newCategory: Category = {
       ...category,
-      id: `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      id: `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: "default-user"
     };
     
     categories.push(newCategory);
     localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories));
+    console.log("✅ Category created in offline storage:", newCategory);
     return newCategory;
   }
 
@@ -127,11 +84,13 @@ export class OfflineStorage {
     const newTransaction: Transaction = {
       ...transaction,
       id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: "default-user",
       date: transaction.date || new Date()
     };
     
     transactions.unshift(newTransaction); // Add to beginning
     localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify(transactions));
+    console.log("✅ Transaction created in offline storage:", newTransaction);
     return newTransaction;
   }
 
@@ -168,30 +127,31 @@ export class OfflineStorage {
     await this.init();
     const stored = localStorage.getItem(STORAGE_KEYS.budgets);
     if (!stored) {
-      console.log("No budgets found in storage");
+      console.log("📱 No budgets found in offline storage");
       return [];
     }
     
     let budgets = JSON.parse(stored);
-    console.log("All budgets from storage:", budgets);
-    console.log("Filtering by month:", month, "year:", year);
+    console.log("💾 All budgets from offline storage:", budgets.length);
     
-    // Filter by month and year if provided - using strict equality with type conversion
-    if (month !== undefined && year !== undefined) {
-      budgets = budgets.filter((b: Budget) => {
-        const budgetMonth = Number(b.month);
-        const budgetYear = Number(b.year);
-        const filterMonth = Number(month);
-        const filterYear = Number(year);
-        
-        console.log("Budget month/year (converted):", budgetMonth, budgetYear, "vs", filterMonth, filterYear);
-        console.log("Match:", budgetMonth === filterMonth && budgetYear === filterYear);
-        
-        return budgetMonth === filterMonth && budgetYear === filterYear;
-      });
+    // If no filters, return current month's budgets
+    if (month === undefined || year === undefined) {
+      const currentDate = new Date();
+      month = currentDate.getMonth() + 1;
+      year = currentDate.getFullYear();
     }
     
-    console.log("Filtered budgets:", budgets);
+    // Filter by month and year - using strict equality with type conversion
+    budgets = budgets.filter((b: Budget) => {
+      const budgetMonth = Number(b.month);
+      const budgetYear = Number(b.year);
+      const filterMonth = Number(month);
+      const filterYear = Number(year);
+      
+      return budgetMonth === filterMonth && budgetYear === filterYear;
+    });
+    
+    console.log(`📊 Found ${budgets.length} budgets for ${month}/${year}`);
     return budgets;
   }
 
@@ -205,6 +165,7 @@ export class OfflineStorage {
       ...budget,
       id: `budget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       spent: "0",
+      userId: "default-user",
       // Force numeric types for filtering
       month: Number(budget.month),
       year: Number(budget.year)
@@ -212,8 +173,8 @@ export class OfflineStorage {
     
     allBudgets.push(newBudget);
     localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify(allBudgets));
-    console.log("Budget created with forced numeric types:", newBudget);
-    console.log("All budgets after creation:", allBudgets);
+    console.log("✅ Budget created in offline storage:", newBudget);
+    console.log("💾 Total budgets in storage:", allBudgets.length);
     return newBudget;
   }
 
@@ -276,6 +237,35 @@ export class OfflineStorage {
     
     goals.splice(index, 1);
     localStorage.setItem(STORAGE_KEYS.goals, JSON.stringify(goals));
+    return true;
+  }
+
+  async deleteBudget(id: string): Promise<boolean> {
+    await this.init();
+    const stored = localStorage.getItem(STORAGE_KEYS.budgets);
+    if (!stored) return false;
+    
+    const budgets = JSON.parse(stored);
+    const index = budgets.findIndex((b: Budget) => b.id === id);
+    
+    if (index === -1) return false;
+    
+    budgets.splice(index, 1);
+    localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify(budgets));
+    console.log("✅ Budget deleted from offline storage:", id);
+    return true;
+  }
+
+  async deleteCategory(id: string): Promise<boolean> {
+    await this.init();
+    const categories = await this.getCategories();
+    const index = categories.findIndex(c => c.id === id);
+    
+    if (index === -1) return false;
+    
+    categories.splice(index, 1);
+    localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories));
+    console.log("✅ Category deleted from offline storage:", id);
     return true;
   }
 

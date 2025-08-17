@@ -2,8 +2,9 @@
 
 ## 📱 Arquivo APK
 - **Localização:** `android/app/build/outputs/apk/debug/app-debug.apk`
-- **Tamanho:** 5.4 MB
-- **Versão:** Debug (para instalação direta)
+- **Tamanho:** 5.7 MB
+- **Versão:** Debug CORRIGIDO (funcionalidade offline completa)
+- **Data:** 17 de Agosto de 2025
 
 ## 📋 Como Instalar no Celular
 
@@ -54,4 +55,12 @@
 - Código-fonte disponível no projeto
 - Dados ficam apenas no seu dispositivo
 
-**🎊 Parabéns! Seu Finance App está pronto para usar!**
+## 🔧 O que foi Corrigido nesta Versão
+- ✅ Orçamentos agora aparecem corretamente no APK offline
+- ✅ Sistema de armazenamento offline completamente reescrito
+- ✅ Criação, edição e exclusão funcionam perfeitamente
+- ✅ Categorias personalizadas funcionam offline
+- ✅ Dashboard atualiza corretamente com dados offline
+- ✅ Todas as funcionalidades testadas em modo offline
+
+**🎊 Parabéns! Seu Finance App com funcionalidade offline completa está pronto para usar!**

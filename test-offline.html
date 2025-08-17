@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance App - Teste Offline</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2196F3; text-align: center; }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            background: #2196F3;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #1976D2; }
+        .success { color: green; margin: 10px 0; }
+        .error { color: red; margin: 10px 0; }
+        .result {
+            background: #f0f8ff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste APK Offline</h1>
+        <p>Este teste simula o ambiente APK offline do Finance App.</p>
+        
+        <button onclick="testCategories()">🔍 Testar Categorias</button>
+        <button onclick="testCreateBudget()">💰 Testar Criar Orçamento</button>
+        <button onclick="testGetBudgets()">📊 Testar Buscar Orçamentos</button>
+        <button onclick="testCreateTransaction()">💸 Testar Criar Transação</button>
+        <button onclick="testDashboard()">📈 Testar Dashboard</button>
+        <button onclick="clearStorage()">🗑️ Limpar Dados</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Mock Capacitor environment
+        window.Capacitor = { isNativePlatform: () => true };
+        
+        // Simulate offline storage
+        const STORAGE_KEYS = {
+            categories: 'finance-app-categories',
+            transactions: 'finance-app-transactions',
+            budgets: 'finance-app-budgets',
+            goals: 'finance-app-goals',
+            initialized: 'finance-app-initialized'
+        };
+
+        const defaultCategories = [
+            { id: "cat-1", name: "Alimentação", icon: "coffee", color: "#FF9800", userId: "default-user" },
+            { id: "cat-2", name: "Transporte", icon: "car", color: "#2196F3", userId: "default-user" },
+            { id: "cat-3", name: "Lazer", icon: "gamepad-2", color: "#9C27B0", userId: "default-user" },
+            { id: "cat-4", name: "Contas", icon: "file-text", color: "#F44336", userId: "default-user" },
+            { id: "cat-5", name: "Salário", icon: "arrow-down-left", color: "#4CAF50", userId: "default-user" },
+            { id: "cat-outros", name: "Outros", icon: "more-horizontal", color: "#757575", userId: "default-user" }
+        ];
+
+        function log(message, isError = false) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'success';
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function initStorage() {
+            const isInitialized = localStorage.getItem(STORAGE_KEYS.initialized);
+            if (!isInitialized) {
+                localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(defaultCategories));
+                localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify([]));
+                localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify([]));
+                localStorage.setItem(STORAGE_KEYS.goals, JSON.stringify([]));
+                localStorage.setItem(STORAGE_KEYS.initialized, 'true');
+                log("🚀 Storage inicializado com dados padrão");
+            } else {
+                log("📱 Storage já inicializado");
+            }
+        }
+
+        function testCategories() {
+            initStorage();
+            const stored = localStorage.getItem(STORAGE_KEYS.categories);
+            const categories = stored ? JSON.parse(stored) : [];
+            log(`✅ Categorias encontradas: ${categories.length}`);
+            
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'result';
+            resultsDiv.innerHTML = `<strong>Categorias:</strong><br>${categories.map(c => `${c.name} (${c.icon})`).join('<br>')}`;
+            document.getElementById('results').appendChild(resultsDiv);
+        }
+
+        function testCreateBudget() {
+            initStorage();
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+            
+            const newBudget = {
+                id: `budget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                name: "Teste Offline",
+                amount: "500",
+                spent: "0",
+                categoryId: "cat-1",
+                userId: "default-user",
+                month: Number(month),
+                year: Number(year)
+            };
+            
+            const stored = localStorage.getItem(STORAGE_KEYS.budgets);
+            const budgets = stored ? JSON.parse(stored) : [];
+            budgets.push(newBudget);
+            localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify(budgets));
+            
+            log(`✅ Orçamento criado: ${newBudget.name} - R$ ${newBudget.amount}`);
+            log(`📅 Mês/Ano: ${month}/${year}`);
+        }
+
+        function testGetBudgets() {
+            initStorage();
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+            
+            const stored = localStorage.getItem(STORAGE_KEYS.budgets);
+            if (!stored) {
+                log("❌ Nenhum orçamento encontrado", true);
+                return;
+            }
+            
+            let budgets = JSON.parse(stored);
+            log(`💾 Total de orçamentos no storage: ${budgets.length}`);
+            
+            // Filter by current month/year
+            budgets = budgets.filter(b => {
+                const budgetMonth = Number(b.month);
+                const budgetYear = Number(b.year);
+                const filterMonth = Number(month);
+                const filterYear = Number(year);
+                return budgetMonth === filterMonth && budgetYear === filterYear;
+            });
+            
+            log(`📊 Orçamentos para ${month}/${year}: ${budgets.length}`);
+            
+            if (budgets.length > 0) {
+                const resultsDiv = document.createElement('div');
+                resultsDiv.className = 'result';
+                resultsDiv.innerHTML = `<strong>Orçamentos Encontrados:</strong><br>${budgets.map(b => `${b.name}: R$ ${b.amount} (Gasto: R$ ${b.spent})`).join('<br>')}`;
+                document.getElementById('results').appendChild(resultsDiv);
+            }
+        }
+
+        function testCreateTransaction() {
+            initStorage();
+            const newTransaction = {
+                id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                amount: "150.00",
+                description: "Teste Offline",
+                type: "expense",
+                categoryId: "cat-1",
+                userId: "default-user",
+                date: new Date(),
+                tags: null
+            };
+            
+            const stored = localStorage.getItem(STORAGE_KEYS.transactions);
+            const transactions = stored ? JSON.parse(stored) : [];
+            transactions.unshift(newTransaction);
+            localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify(transactions));
+            
+            log(`✅ Transação criada: ${newTransaction.description} - R$ ${newTransaction.amount}`);
+        }
+
+        function testDashboard() {
+            initStorage();
+            const stored = localStorage.getItem(STORAGE_KEYS.transactions);
+            const transactions = stored ? JSON.parse(stored) : [];
+            
+            let income = 0;
+            let expenses = 0;
+            
+            transactions.forEach(t => {
+                const amount = parseFloat(t.amount);
+                if (t.type === 'income') {
+                    income += amount;
+                } else {
+                    expenses += amount;
+                }
+            });
+            
+            const balance = income - expenses;
+            
+            log(`💰 Saldo: R$ ${balance.toFixed(2)}`);
+            log(`📈 Receita: R$ ${income.toFixed(2)}`);
+            log(`📉 Despesas: R$ ${expenses.toFixed(2)}`);
+            
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'result';
+            resultsDiv.innerHTML = `<strong>Dashboard:</strong><br>Saldo: R$ ${balance.toFixed(2)}<br>Receitas: R$ ${income.toFixed(2)}<br>Despesas: R$ ${expenses.toFixed(2)}<br>Transações: ${transactions.length}`;
+            document.getElementById('results').appendChild(resultsDiv);
+        }
+
+        function clearStorage() {
+            Object.values(STORAGE_KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
+            document.getElementById('results').innerHTML = '';
+            log("🗑️ Todos os dados foram limpos");
+        }
+
+        // Auto-initialize on page load
+        window.onload = function() {
+            log("📱 Simulador APK Offline iniciado");
+            log("🔧 Ambiente Capacitor simulado: OK");
+        };
+    </script>
+</body>
+</html>

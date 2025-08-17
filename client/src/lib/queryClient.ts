@@ -84,6 +84,26 @@ async function handleOfflineRequest(method: string, url: string, data?: unknown)
       );
     } else if (url === '/api/budgets' && method === 'POST') {
       result = await offlineStorage.createBudget(data as any);
+    } else if (url.startsWith('/api/budgets/') && method === 'DELETE') {
+      const id = url.split('/').pop();
+      const success = await offlineStorage.deleteBudget(id!);
+      if (!success) {
+        return new Response(JSON.stringify({ error: 'Budget not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      result = { success: true };
+    } else if (url.startsWith('/api/categories/') && method === 'DELETE') {
+      const id = url.split('/').pop();
+      const success = await offlineStorage.deleteCategory(id!);
+      if (!success) {
+        return new Response(JSON.stringify({ error: 'Category not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      result = { success: true };
     } else if (url === '/api/goals' && method === 'GET') {
       result = await offlineStorage.getGoals();
     } else if (url === '/api/goals' && method === 'POST') {
