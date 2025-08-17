@@ -2,7 +2,11 @@ import { Progress } from "@/components/ui/progress";
 import { Budget, Category } from "@shared/schema";
 import { formatCurrency } from "@/lib/currency";
 import * as Icons from "lucide-react";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface BudgetCardProps {
   budget: Budget;
@@ -10,6 +14,9 @@ interface BudgetCardProps {
 }
 
 export function BudgetCard({ budget, category }: BudgetCardProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const spent = parseFloat(budget.spent);
   const total = parseFloat(budget.amount);
   const percentage = (spent / total) * 100;
@@ -32,6 +39,32 @@ export function BudgetCard({ budget, category }: BudgetCardProps) {
     return <IconComponent className="w-5 h-5" style={{ color: category.color }} />;
   };
 
+  const deleteBudgetMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/budgets/${budget.id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets", currentMonth, currentYear] });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      toast({
+        title: "Orçamento excluído",
+        description: "O orçamento foi removido com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o orçamento.",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <div className="bg-dark-surface p-4 rounded-xl border border-gray-700" data-testid={`budget-card-${budget.id}`}>
       <div className="flex items-center justify-between mb-3">
@@ -51,9 +84,21 @@ export function BudgetCard({ budget, category }: BudgetCardProps) {
             </p>
           </div>
         </div>
-        <span className="text-sm text-text-secondary" data-testid={`text-budget-percentage-${budget.id}`}>
-          {percentage.toFixed(0)}%
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-text-secondary" data-testid={`text-budget-percentage-${budget.id}`}>
+            {percentage.toFixed(0)}%
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => deleteBudgetMutation.mutate()}
+            disabled={deleteBudgetMutation.isPending}
+            className="h-8 w-8 p-0 hover:bg-expense-red/20 hover:text-expense-red"
+            data-testid={`button-delete-budget-${budget.id}`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
       <Progress 
         value={percentage} 

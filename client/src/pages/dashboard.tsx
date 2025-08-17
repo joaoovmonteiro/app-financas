@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { PieChart } from "@/components/charts/pie-chart";
 import { formatCurrency } from "@/lib/currency";
 import { Transaction, Category } from "@shared/schema";
-import { Eye, EyeOff, TrendingUp, TrendingDown } from "lucide-react";
+import { Eye, EyeOff, TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
 import * as Icons from "lucide-react";
 
 interface DashboardData {
@@ -23,6 +23,10 @@ export function Dashboard() {
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: budgets = [] } = useQuery({
+    queryKey: ["/api/budgets"],
   });
 
   console.log("Dashboard Debug:", { dashboardData, isLoading, error, categories });
@@ -63,6 +67,16 @@ export function Dashboard() {
 
   const { balance, income, expenses, recentTransactions } = dashboardData;
   const balanceChange = balance > 0 ? "+2.1%" : "-1.2%";
+
+  // Calculate smart tips for budgets
+  const totalBudget = budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.amount), 0);
+  const totalSpent = budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.spent), 0);
+  const remainingBudget = totalBudget - totalSpent;
+  
+  const currentDate = new Date();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - currentDate.getDate();
+  const dailySuggestion = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
 
   const getCategoryIcon = (categoryId: string) => {
     const category = categories.find((c) => c.id === categoryId);
@@ -129,6 +143,25 @@ export function Dashboard() {
           </Card>
         </div>
       </div>
+
+      {/* Smart Tip for Budgets */}
+      {dailySuggestion > 0 && budgets.length > 0 && (
+        <Card className="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+          <div className="flex items-center space-x-2 mb-3">
+            <Lightbulb className="w-5 h-5 text-accent-purple" />
+            <h3 className="text-lg font-semibold text-accent-purple">Dica Inteligente</h3>
+          </div>
+          <div className="bg-accent-purple/10 border border-accent-purple/30 rounded-xl p-4">
+            <p className="text-text-secondary" data-testid="text-dashboard-smart-tip">
+              Com base nos seus orçamentos, você pode gastar <span className="text-accent-purple font-semibold">
+                {formatCurrency(dailySuggestion)}
+              </span> por dia nos próximos <span className="text-accent-purple font-semibold">
+                {daysRemaining} dias
+              </span> sem estourar o orçamento.
+            </p>
+          </div>
+        </Card>
+      )}
 
       {/* Overview Chart */}
       <Card className="bg-dark-surface p-6 rounded-2xl border border-gray-700">

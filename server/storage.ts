@@ -10,6 +10,7 @@ export interface IStorage {
   // Categories
   getCategories(userId: string): Promise<Category[]>;
   createCategory(category: InsertCategory): Promise<Category>;
+  deleteCategory(id: string): Promise<boolean>;
   
   // Transactions
   getTransactions(userId: string, filters?: { type?: string; categoryId?: string; month?: number; year?: number }): Promise<Transaction[]>;
@@ -21,6 +22,7 @@ export interface IStorage {
   getBudgets(userId: string, month: number, year: number): Promise<Budget[]>;
   createBudget(budget: InsertBudget): Promise<Budget>;
   updateBudget(id: string, budget: Partial<Budget>): Promise<Budget | undefined>;
+  deleteBudget(id: string): Promise<boolean>;
   
   // Goals
   getGoals(userId: string): Promise<Goal[]>;
@@ -150,6 +152,10 @@ export class MemStorage implements IStorage {
     return category;
   }
 
+  async deleteCategory(id: string): Promise<boolean> {
+    return this.categories.delete(id);
+  }
+
   // Transactions
   async getTransactions(userId: string, filters?: { type?: string; categoryId?: string; month?: number; year?: number }): Promise<Transaction[]> {
     let transactions = Array.from(this.transactions.values()).filter(t => t.userId === userId);
@@ -246,6 +252,14 @@ export class MemStorage implements IStorage {
     const updated = { ...budget, ...updates };
     this.budgets.set(id, updated);
     return updated;
+  }
+
+  async deleteBudget(id: string): Promise<boolean> {
+    return this.budgets.delete(id);
+  }
+
+  async deleteBudget(id: string): Promise<boolean> {
+    return this.budgets.delete(id);
   }
 
   // Goals

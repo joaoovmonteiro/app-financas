@@ -171,21 +171,7 @@ export function Budgets({ shouldOpenModal = false, onModalClose }: BudgetsProps)
           </div>
         </div>
         
-        {dailySuggestion > 0 && (
-          <div className="mt-4 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-xl">
-            <div className="flex items-center space-x-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-accent-purple" />
-              <span className="text-sm font-medium text-accent-purple">Dica inteligente</span>
-            </div>
-            <p className="text-sm text-text-secondary" data-testid="text-daily-suggestion">
-              Você pode gastar <span className="text-accent-purple font-semibold">
-                {formatCurrency(dailySuggestion)}
-              </span> por dia nos próximos <span className="text-accent-purple font-semibold">
-                {daysRemaining} dias
-              </span>.
-            </p>
-          </div>
-        )}
+
       </Card>
 
       {/* Budget Categories */}

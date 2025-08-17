@@ -107,13 +107,13 @@ function App() {
               >
                 <DropdownMenuItem 
                   onClick={() => setIsTransactionModalOpen(true)}
-                  className="hover:bg-accent-purple/40 text-white cursor-pointer px-5 py-4 rounded-xl m-1 bg-gradient-to-r from-accent-purple/30 to-accent-purple/15 border-2 border-accent-purple/50 shadow-xl transform hover:scale-105 transition-all duration-200"
+                  className="hover:bg-gradient-to-r hover:from-accent-purple/50 hover:to-accent-purple/30 text-white cursor-pointer px-6 py-5 rounded-2xl m-1 bg-gradient-to-r from-accent-purple/40 to-accent-purple/20 border-2 border-accent-purple/60 shadow-2xl transform hover:scale-110 transition-all duration-300 ring-2 ring-accent-purple/30"
                   data-testid="menu-add-transaction"
                 >
-                  <Receipt className="w-6 h-6 mr-4 text-accent-purple" />
+                  <Receipt className="w-7 h-7 mr-4 text-accent-purple drop-shadow-lg" />
                   <div className="flex flex-col">
-                    <span className="font-extrabold text-accent-purple text-base">Nova Transação</span>
-                    <span className="text-sm text-accent-purple/90 font-medium">Adicionar receita ou gasto</span>
+                    <span className="font-black text-accent-purple text-lg tracking-wide">NOVA TRANSAÇÃO</span>
+                    <span className="text-sm text-accent-purple/95 font-bold">✨ Adicionar receita ou gasto</span>
                   </div>
                 </DropdownMenuItem>
                 

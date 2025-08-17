@@ -26,6 +26,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/categories/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteCategory(req.params.id);
+      if (success) {
+        res.json({ message: "Category deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Category not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
   // Transactions
   app.get("/api/transactions", async (req, res) => {
     try {
@@ -108,6 +121,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(budget);
     } catch (error) {
       res.status(400).json({ message: "Invalid budget data" });
+    }
+  });
+
+  app.delete("/api/budgets/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteBudget(req.params.id);
+      if (success) {
+        res.json({ message: "Budget deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Budget not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete budget" });
     }
   });
 

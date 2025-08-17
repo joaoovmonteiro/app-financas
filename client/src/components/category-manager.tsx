@@ -8,7 +8,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Category } from "@shared/schema";
-import { Plus, Tag } from "lucide-react";
+import { Plus, Tag, Trash2 } from "lucide-react";
 import * as Icons from "lucide-react";
 
 const availableIcons = [
@@ -81,6 +81,27 @@ export function CategoryManager({ trigger, forceOpen = false, onClose }: Categor
       toast({
         title: "Erro",
         description: `Erro ao criar categoria: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (categoryId: string) => {
+      const response = await apiRequest("DELETE", `/api/categories/${categoryId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      toast({
+        title: "Categoria excluída",
+        description: "Categoria removida com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a categoria.",
         variant: "destructive",
       });
     },
@@ -259,20 +280,32 @@ export function CategoryManager({ trigger, forceOpen = false, onClose }: Categor
         {categories.length > 0 && (
           <div className="border-t pt-4 mt-4">
             <Label className="text-sm font-medium">Categorias Existentes</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="grid grid-cols-1 gap-2 mt-2">
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center space-x-2 p-2 bg-dark-surface rounded-lg"
+                  className="flex items-center justify-between p-2 bg-dark-surface rounded-lg"
                   data-testid={`existing-category-${category.id}`}
                 >
-                  <div 
-                    className="w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: `${category.color}20`, color: category.color }}
-                  >
-                    {getIconComponent(category.icon)}
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: `${category.color}20`, color: category.color }}
+                    >
+                      {getIconComponent(category.icon)}
+                    </div>
+                    <span className="text-sm text-white truncate">{category.name}</span>
                   </div>
-                  <span className="text-sm text-white truncate">{category.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteCategoryMutation.mutate(category.id)}
+                    disabled={deleteCategoryMutation.isPending}
+                    className="h-8 w-8 p-0 hover:bg-expense-red/20 hover:text-expense-red"
+                    data-testid={`button-delete-category-${category.id}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>
