@@ -7,16 +7,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Transaction, Category } from "@shared/schema";
 import { formatCurrency } from "@/lib/currency";
-import { Search, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Search, MoreVertical, Edit, Trash2, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import * as Icons from "lucide-react";
 
 interface TransactionsProps {
   onEditTransaction: (transaction: Transaction) => void;
+  onAddTransaction: () => void;
 }
 
-export function Transactions({ onEditTransaction }: TransactionsProps) {
+export function Transactions({ onEditTransaction, onAddTransaction }: TransactionsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
 
@@ -92,6 +93,19 @@ export function Transactions({ onEditTransaction }: TransactionsProps) {
 
   return (
     <div className="px-4 py-6 space-y-6 fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Transações</h2>
+        <Button 
+          onClick={onAddTransaction}
+          className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          data-testid="button-add-transaction-page"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="font-medium">Nova Transação</span>
+        </Button>
+      </div>
+      
       {/* Search and Filters */}
       <div className="space-y-4">
         <div className="relative">

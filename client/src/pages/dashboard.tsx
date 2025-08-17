@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PieChart } from "@/components/charts/pie-chart";
 import { formatCurrency } from "@/lib/currency";
-import { Transaction, Category } from "@shared/schema";
-import { Eye, EyeOff, TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
+import { Transaction, Category, Budget } from "@shared/schema";
+import { Eye, EyeOff, TrendingUp, TrendingDown, Lightbulb, ChevronLeft, ChevronRight } from "lucide-react";
 import * as Icons from "lucide-react";
 
 interface DashboardData {
@@ -16,6 +17,7 @@ interface DashboardData {
 
 export function Dashboard() {
   const [showBalance, setShowBalance] = useState(true);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
   
   const { data: dashboardData, isLoading, error } = useQuery<DashboardData>({
     queryKey: ["/api/dashboard"],
@@ -25,9 +27,59 @@ export function Dashboard() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: budgets = [] } = useQuery({
+  const { data: budgets = [] } = useQuery<Budget[]>({
     queryKey: ["/api/budgets"],
   });
+
+  // Calculate smart tips for each budget - called at the top level always
+  const currentDate = new Date();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - currentDate.getDate();
+  
+  const budgetTips = useMemo(() => {
+    if (!budgets.length || daysRemaining <= 0) return [];
+    
+    return budgets.map((budget: Budget) => {
+      const remaining = parseFloat(budget.amount) - parseFloat(budget.spent || "0");
+      const dailyLimit = remaining / daysRemaining;
+      const category = categories.find((c) => c.id === budget.categoryId);
+      
+      return {
+        budgetName: budget.name,
+        categoryName: category?.name || "Categoria",
+        categoryIcon: category?.icon || "circle",
+        categoryColor: category?.color || "#666",
+        dailyLimit,
+        remaining,
+        daysRemaining,
+        amount: parseFloat(budget.amount),
+        spent: parseFloat(budget.spent || "0")
+      };
+    });
+  }, [budgets, categories, daysRemaining]);
+
+  // Auto-rotate tips every 5 seconds - called at the top level always
+  useEffect(() => {
+    if (budgetTips.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentTipIndex((prev) => (prev + 1) % budgetTips.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [budgetTips.length]);
+
+  const nextTip = () => {
+    if (budgetTips.length > 0) {
+      setCurrentTipIndex((prev) => (prev + 1) % budgetTips.length);
+    }
+  };
+
+  const prevTip = () => {
+    if (budgetTips.length > 0) {
+      setCurrentTipIndex((prev) => (prev - 1 + budgetTips.length) % budgetTips.length);
+    }
+  };
 
   console.log("Dashboard Debug:", { dashboardData, isLoading, error, categories });
 
@@ -58,7 +110,7 @@ export function Dashboard() {
     return (
       <div className="px-4 py-6">
         <div className="bg-yellow-900/20 border border-yellow-500 rounded-2xl p-4">
-          <h3 className="text-yellow-400 font-semibold mb-2">Nenhum dado encontrado</h3>
+          <h3 className="text-yellow-400 font-semibold mb-2">Nenhum dados encontrado</h3>
           <p className="text-yellow-300">Carregando informações...</p>
         </div>
       </div>
@@ -67,16 +119,6 @@ export function Dashboard() {
 
   const { balance, income, expenses, recentTransactions } = dashboardData;
   const balanceChange = balance > 0 ? "+2.1%" : "-1.2%";
-
-  // Calculate smart tips for budgets
-  const totalBudget = budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.amount), 0);
-  const totalSpent = budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.spent), 0);
-  const remainingBudget = totalBudget - totalSpent;
-  
-  const currentDate = new Date();
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-  const daysRemaining = daysInMonth - currentDate.getDate();
-  const dailySuggestion = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
 
   const getCategoryIcon = (categoryId: string) => {
     const category = categories.find((c) => c.id === categoryId);
@@ -144,22 +186,73 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Smart Tip for Budgets */}
-      {dailySuggestion > 0 && budgets.length > 0 && (
+      {/* Smart Tips Carousel */}
+      {budgetTips.length > 0 && (
         <Card className="bg-dark-surface p-6 rounded-2xl border border-gray-700">
-          <div className="flex items-center space-x-2 mb-3">
-            <Lightbulb className="w-5 h-5 text-accent-purple" />
-            <h3 className="text-lg font-semibold text-accent-purple">Dica Inteligente</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Lightbulb className="w-5 h-5 text-accent-purple" />
+              <h3 className="text-lg font-semibold text-accent-purple">Dicas Inteligentes</h3>
+            </div>
+            {budgetTips.length > 1 && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={prevTip}
+                  className="h-8 w-8 p-0 hover:bg-accent-purple/20"
+                  data-testid="button-prev-tip"
+                >
+                  <ChevronLeft className="w-4 h-4 text-accent-purple" />
+                </Button>
+                <span className="text-xs text-text-secondary">
+                  {currentTipIndex + 1}/{budgetTips.length}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={nextTip}
+                  className="h-8 w-8 p-0 hover:bg-accent-purple/20"
+                  data-testid="button-next-tip"
+                >
+                  <ChevronRight className="w-4 h-4 text-accent-purple" />
+                </Button>
+              </div>
+            )}
           </div>
-          <div className="bg-accent-purple/10 border border-accent-purple/30 rounded-xl p-4">
-            <p className="text-text-secondary" data-testid="text-dashboard-smart-tip">
-              Com base nos seus orçamentos, você pode gastar <span className="text-accent-purple font-semibold">
-                {formatCurrency(dailySuggestion)}
-              </span> por dia nos próximos <span className="text-accent-purple font-semibold">
-                {daysRemaining} dias
-              </span> sem estourar o orçamento.
-            </p>
-          </div>
+          
+          {budgetTips[currentTipIndex] && (
+            <div className="bg-accent-purple/10 border border-accent-purple/30 rounded-xl p-4">
+              <div className="flex items-center space-x-3 mb-3">
+                {(() => {
+                  const tip = budgetTips[currentTipIndex];
+                  const IconComponent = (Icons as any)[tip.categoryIcon] || Icons.Circle;
+                  return <IconComponent className="w-5 h-5" style={{ color: tip.categoryColor }} />;
+                })()}
+                <span className="font-semibold text-accent-purple text-sm">
+                  {budgetTips[currentTipIndex].budgetName} - {budgetTips[currentTipIndex].categoryName}
+                </span>
+              </div>
+              <p className="text-text-secondary" data-testid={`text-smart-tip-${currentTipIndex}`}>
+                {budgetTips[currentTipIndex].remaining > 0 ? (
+                  <>
+                    Você pode gastar <span className="text-accent-purple font-semibold">
+                      {formatCurrency(budgetTips[currentTipIndex].dailyLimit)}
+                    </span> por dia nos próximos <span className="text-accent-purple font-semibold">
+                      {budgetTips[currentTipIndex].daysRemaining} dias
+                    </span> para ficar dentro do orçamento de {budgetTips[currentTipIndex].categoryName}.
+                  </>
+                ) : (
+                  <>
+                    Orçamento de {budgetTips[currentTipIndex].categoryName} esgotado. 
+                    Você já gastou <span className="text-expense-red font-semibold">
+                      {formatCurrency(budgetTips[currentTipIndex].spent)}
+                    </span> de {formatCurrency(budgetTips[currentTipIndex].amount)}.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
         </Card>
       )}
 

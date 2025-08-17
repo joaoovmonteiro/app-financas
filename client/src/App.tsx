@@ -34,6 +34,11 @@ function App() {
     setIsTransactionModalOpen(true);
   };
 
+  const handleAddTransaction = () => {
+    setEditingTransaction(null);
+    setIsTransactionModalOpen(true);
+  };
+
   const handleCloseModal = (open: boolean) => {
     setIsTransactionModalOpen(open);
     if (!open) {
@@ -46,7 +51,7 @@ function App() {
       case "dashboard":
         return <Dashboard />;
       case "transactions":
-        return <Transactions onEditTransaction={handleEditTransaction} />;
+        return <Transactions onEditTransaction={handleEditTransaction} onAddTransaction={handleAddTransaction} />;
       case "budgets":
         return <Budgets shouldOpenModal={isBudgetModalOpen} onModalClose={() => setIsBudgetModalOpen(false)} />;
 
@@ -107,13 +112,13 @@ function App() {
               >
                 <DropdownMenuItem 
                   onClick={() => setIsTransactionModalOpen(true)}
-                  className="hover:bg-gradient-to-r hover:from-accent-purple/50 hover:to-accent-purple/30 text-white cursor-pointer px-6 py-5 rounded-2xl m-1 bg-gradient-to-r from-accent-purple/40 to-accent-purple/20 border-2 border-accent-purple/60 shadow-2xl transform hover:scale-110 transition-all duration-300 ring-2 ring-accent-purple/30"
+                  className="hover:bg-accent-purple/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-accent-purple/20 border border-accent-purple/40 transition-colors duration-200"
                   data-testid="menu-add-transaction"
                 >
-                  <Receipt className="w-7 h-7 mr-4 text-accent-purple drop-shadow-lg" />
+                  <Receipt className="w-5 h-5 mr-3 text-accent-purple" />
                   <div className="flex flex-col">
-                    <span className="font-black text-accent-purple text-lg tracking-wide">NOVA TRANSAÇÃO</span>
-                    <span className="text-sm text-accent-purple/95 font-bold">✨ Adicionar receita ou gasto</span>
+                    <span className="font-bold text-accent-purple text-sm">NOVA TRANSAÇÃO</span>
+                    <span className="text-xs text-accent-purple/80">Adicionar receita ou gasto</span>
                   </div>
                 </DropdownMenuItem>
                 
@@ -122,7 +127,7 @@ function App() {
                     setActiveTab("budgets");
                     setIsBudgetModalOpen(true);
                   }}
-                  className="hover:bg-income-green/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-gradient-to-r from-income-green/20 to-income-green/10 border border-income-green/40 shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="hover:bg-income-green/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-income-green/20 border border-income-green/40 transition-colors duration-200"
                   data-testid="menu-add-budget"
                 >
                   <Target className="w-5 h-5 mr-3 text-income-green" />
@@ -137,7 +142,7 @@ function App() {
                     setActiveTab("settings");
                     setIsCategoryModalOpen(true);
                   }}
-                  className="hover:bg-warning-yellow/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-gradient-to-r from-warning-yellow/20 to-warning-yellow/10 border border-warning-yellow/40 shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="hover:bg-warning-yellow/30 text-white cursor-pointer px-4 py-3 rounded-lg m-1 bg-warning-yellow/20 border border-warning-yellow/40 transition-colors duration-200"
                   data-testid="menu-add-category"
                 >
                   <FolderPlus className="w-5 h-5 mr-3 text-warning-yellow" />
