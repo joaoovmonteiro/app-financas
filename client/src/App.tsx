@@ -35,6 +35,7 @@ function App() {
   };
 
   const handleAddTransaction = () => {
+    console.log("handleAddTransaction called");
     setEditingTransaction(null);
     setIsTransactionModalOpen(true);
   };

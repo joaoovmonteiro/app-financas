@@ -97,7 +97,10 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Transações</h2>
         <Button 
-          onClick={onAddTransaction}
+          onClick={() => {
+            console.log("Nova Transação button clicked");
+            onAddTransaction();
+          }}
           className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           data-testid="button-add-transaction-page"
         >
