@@ -104,9 +104,12 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
         <Button 
           onClick={() => {
             console.log("Nova Transação button clicked");
-            // Use the same approach as the floating action button
-            const addTransactionEvent = new CustomEvent('openTransactionModal');
-            window.dispatchEvent(addTransactionEvent);
+            // Call the global function directly
+            if ((window as any).openTransactionModal) {
+              (window as any).openTransactionModal();
+            } else {
+              console.error("openTransactionModal function not found on window");
+            }
           }}
           className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           data-testid="button-add-transaction-page"

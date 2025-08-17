@@ -29,17 +29,16 @@ function App() {
   // Enable keyboard dismissal on touch outside
   useKeyboardDismiss();
 
-  // Listen for fallback transaction modal events
+  // Create global function to open transaction modal
   useEffect(() => {
-    const handleOpenTransactionModal = () => {
-      console.log("Custom event received: openTransactionModal");
+    (window as any).openTransactionModal = () => {
+      console.log("Global openTransactionModal called");
       setEditingTransaction(null);
       setIsTransactionModalOpen(true);
     };
 
-    window.addEventListener('openTransactionModal', handleOpenTransactionModal);
     return () => {
-      window.removeEventListener('openTransactionModal', handleOpenTransactionModal);
+      delete (window as any).openTransactionModal;
     };
   }, []);
 
