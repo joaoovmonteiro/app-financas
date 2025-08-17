@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceFlow - Personal Finance Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'finance-blue': '#2F4F6F',
+                        'finance-green': '#4CAF50',
+                        'finance-red': '#F44336',
+                        'finance-yellow': '#FFC107',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                    }
+                }
+            },
+            darkMode: 'class',
+        };
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- @COMPONENT: AppLayout -->
+    <div class="min-h-screen flex">
+        <!-- @COMPONENT: Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg hidden lg:block transition-colors duration-300">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-10 h-10 bg-finance-blue rounded-lg flex items-center justify-center">
+                        <i class="fas fa-wallet text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">FinanceFlow</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Controle Financeiro</p>
+                    </div>
+                </div>
+                
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-finance-blue bg-blue-50 dark:bg-blue-900/20 rounded-lg font-medium">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Transações</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Orçamentos</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Metas</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Estatísticas</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-tags"></i>
+                        <span>Categorias</span>
+                    </a>
+                </nav>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button onclick="toggleTheme()" class="flex items-center space-x-3 px-4 py-3 w-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                        <span class="dark:hidden">Modo Escuro</span>
+                        <span class="hidden dark:inline">Modo Claro</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainContent -->
+        <main class="flex-1 overflow-hidden">
+            <!-- @COMPONENT: Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
+                        <p class="text-gray-600 dark:text-gray-400" data-bind="currentDate">Dezembro 2024</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="lg:hidden p-2 text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-finance-blue rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="hidden sm:block">
+                                <p class="font-medium text-gray-900 dark:text-white" data-bind="user.name">João Silva</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Usuário Premium</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: Header -->
+
+            <!-- @COMPONENT: DashboardContent -->
+            <div class="p-6 space-y-6 overflow-y-auto h-full">
+                <!-- @COMPONENT: FinancialSummaryCards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Balance Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover animate-slide-up transition-colors duration-300" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Saldo Total</p>
+                                <p class="text-3xl font-bold text-finance-blue dark:text-blue-400 mt-2" data-bind="balance.total">R$ 15.847,32</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-arrow-up text-finance-green text-sm mr-1"></i>
+                                    <span class="text-sm text-finance-green">+8.2% este mês</span>
+                                </div>
+                            </div>
+                            <div class="w-16 h-16 bg-finance-blue/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-wallet text-finance-blue text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Income Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover animate-slide-up transition-colors duration-300" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas</p>
+                                <p class="text-3xl font-bold text-finance-green mt-2" data-bind="income.total">R$ 8.500,00</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-arrow-up text-finance-green text-sm mr-1"></i>
+                                    <span class="text-sm text-finance-green">+3.1% este mês</span>
+                                </div>
+                            </div>
+                            <div class="w-16 h-16 bg-finance-green/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-finance-green text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expenses Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover animate-slide-up transition-colors duration-300" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Despesas</p>
+                                <p class="text-3xl font-bold text-finance-red mt-2" data-bind="expenses.total">R$ 4.320,85</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-arrow-down text-finance-red text-sm mr-1"></i>
+                                    <span class="text-sm text-finance-red">-1.8% este mês</span>
+                                </div>
+                            </div>
+                            <div class="w-16 h-16 bg-finance-red/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-up text-finance-red text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: FinancialSummaryCards -->
+
+                <!-- @COMPONENT: ChartsAndTransactions -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- @COMPONENT: IncomeExpenseChart -->
+                    <div class="xl:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in transition-colors duration-300">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Receitas vs Despesas</h3>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-1 bg-finance-blue text-white rounded-lg text-sm">6M</button>
+                                <button class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm">1A</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: IncomeExpenseChart -->
+
+                    <!-- @COMPONENT: ExpensesByCategoryChart -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in transition-colors duration-300">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Despesas por Categoria</h3>
+                        <div class="h-80 flex items-center justify-center">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: ExpensesByCategoryChart -->
+                </div>
+                <!-- @END_COMPONENT: ChartsAndTransactions -->
+
+                <!-- @COMPONENT: BudgetsAndGoals -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- @COMPONENT: BudgetProgress -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-slide-up transition-colors duration-300">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Orçamentos Mensais</h3>
+                        <div class="space-y-4">
+                            <!-- @MAP: budgets.map(budget => ( -->
+                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-utensils text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white" data-bind="budget.category">Alimentação</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">R$ 1.200 / R$ 1.500</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-1">
+                                        <div class="bg-finance-green h-2 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                    <span class="text-sm text-finance-green font-medium">80%</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-car text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">Transporte</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">R$ 580 / R$ 600</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-1">
+                                        <div class="bg-finance-yellow h-2 rounded-full" style="width: 97%"></div>
+                                    </div>
+                                    <span class="text-sm text-finance-yellow font-medium">97%</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-gamepad text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">Lazer</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">R$ 450 / R$ 400</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-1">
+                                        <div class="bg-finance-red h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-sm text-finance-red font-medium">112%</span>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: BudgetProgress -->
+
+                    <!-- @COMPONENT: GoalsProgress -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-slide-up transition-colors duration-300">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Metas Financeiras</h3>
+                        <div class="space-y-6">
+                            <!-- @MAP: goals.map(goal => ( -->
+                            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium text-gray-900 dark:text-white" data-bind="goal.title">Fundo de Emergência</h4>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">75%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mb-2">
+                                    <div class="bg-finance-green h-3 rounded-full transition-all duration-500" style="width: 75%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                    <span>R$ 7.500</span>
+                                    <span>R$ 10.000</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium text-gray-900 dark:text-white">Viagem Férias</h4>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">45%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mb-2">
+                                    <div class="bg-finance-green h-3 rounded-full transition-all duration-500" style="width: 45%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                    <span>R$ 2.250</span>
+                                    <span>R$ 5.000</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium text-gray-900 dark:text-white">Carro Novo</h4>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">25%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mb-2">
+                                    <div class="bg-finance-yellow h-3 rounded-full transition-all duration-500" style="width: 25%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                    <span>R$ 12.500</span>
+                                    <span>R$ 50.000</span>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: GoalsProgress -->
+                </div>
+                <!-- @END_COMPONENT: BudgetsAndGoals -->
+
+                <!-- @COMPONENT: RecentTransactions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in transition-colors duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Transações Recentes</h3>
+                        <button class="text-finance-blue hover:text-blue-700 font-medium" data-event="click:viewAllTransactions">Ver todas</button>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- @MAP: recentTransactions.map(transaction => ( -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-utensils text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white" data-bind="transaction.description">Mercado Central</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400" data-bind="transaction.category">Alimentação • <span data-bind="transaction.date">Hoje</span></p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-finance-red" data-bind="transaction.amount">-R$ 234,50</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs" data-bind="transaction.tag">essencial</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-finance-green rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-building text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Salário Empresa XYZ</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Salário • Ontem</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-finance-green">+R$ 8.500,00</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs">receita</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-gas-pump text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Posto Shell</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Transporte • 2 dias atrás</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-finance-red">-R$ 180,00</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs">combustível</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-film text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Netflix</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Lazer • 3 dias atrás</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-finance-red">-R$ 32,90</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-xs">streaming</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-home text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Aluguel Apartamento</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Moradia • 5 dias atrás</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-finance-red">-R$ 1.200,00</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs">fixo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: RecentTransactions -->
+            </div>
+            <!-- @END_COMPONENT: DashboardContent -->
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+    <!-- @END_COMPONENT: AppLayout -->
+
+    <!-- @COMPONENT: FloatingActionButton -->
+    <button class="fixed bottom-6 right-6 w-14 h-14 bg-finance-blue hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 animate-scale-in" data-event="click:addTransaction">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+    <!-- @END_COMPONENT: FloatingActionButton -->
+
+    <script>
+        (function() {
+            // Theme toggle functionality
+            window.toggleTheme = function() {
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                
+                if (isDark) {
+                    html.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    html.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            };
+
+            // Initialize theme based on system preference or saved preference
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme) {
+                    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+                } else {
+                    document.documentElement.classList.toggle('dark', systemPrefersDark);
+                }
+            }
+
+            // Initialize charts
+            function initializeCharts() {
+                // Income vs Expenses Chart
+                const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+                new Chart(incomeExpenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [{
+                            label: 'Receitas',
+                            data: [8200, 8500, 8300, 8800, 8600, 8500],
+                            backgroundColor: '#4CAF50',
+                            borderRadius: 8,
+                        }, {
+                            label: 'Despesas',
+                            data: [4800, 4200, 4600, 4100, 4500, 4320],
+                            backgroundColor: '#F44336',
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    color: document.documentElement.classList.contains('dark') ? '#E5E7EB' : '#374151'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': R$ ' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                                },
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280',
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+
+                // Category Chart
+                const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Alimentação', 'Transporte', 'Lazer', 'Moradia', 'Outros'],
+                        datasets: [{
+                            data: [1200, 580, 450, 1200, 890],
+                            backgroundColor: ['#FF9800', '#2196F3', '#9C27B0', '#F44336', '#607D8B'],
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    color: document.documentElement.classList.contains('dark') ? '#E5E7EB' : '#374151'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return label + ': R$ ' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%',
+                        animation: {
+                            animateRotate: true,
+                            duration: 1500,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            }
+
+            // Initialize everything
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeTheme();
+                initializeCharts();
+                
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem('theme')) {
+                        document.documentElement.classList.toggle('dark', e.matches);
+                    }
+                });
+            });
+
+            // TODO: Implement business logic for:
+            // - Real-time data fetching for financial data
+            // - Transaction management (CRUD operations)
+            // - Budget tracking and notifications
+            // - Goal progress calculations
+            // - Data export functionality
+            // - User authentication and data persistence
+        })();
+    </script>
+</body>
+</html>

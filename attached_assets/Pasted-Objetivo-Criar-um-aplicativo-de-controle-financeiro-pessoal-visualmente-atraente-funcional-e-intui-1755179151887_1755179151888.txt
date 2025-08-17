@@ -1,0 +1,161 @@
+Objetivo: Criar um aplicativo de controle financeiro pessoal visualmente atraente, funcional e intuitivo, com dashboards, transações, orçamentos, metas e estatísticas.
+Plataforma sugerida: React (Web ou React Native) ou Flutter (iOS/Android).
+Estilo visual: moderno, limpo, responsivo, com tema claro/escuro automático.
+
+1. Telas e funcionalidades principais:
+
+Dashboard
+
+Mostra saldo total, receitas, despesas e últimas 5 transações.
+
+Gráfico de pizza/anél interativo mostrando proporção entre receitas e despesas.
+
+Cartões para cada informação (saldo, receitas, despesas) com cores distintas:
+
+Saldo: azul escuro (#2F4F6F)
+
+Receitas: verde (#4CAF50)
+
+Despesas: vermelho (#F44336)
+
+Animação suave ao carregar os números e gráficos.
+
+Transações
+
+Lista de transações com data, valor, categoria e tags.
+
+Filtros: período customizado, categoria, tipo (entrada/saída), valor.
+
+Pesquisa por nome, nota ou valor.
+
+Adição rápida de transações via botão flutuante “+” no canto inferior direito.
+
+Etiquetas/tags personalizáveis por usuário.
+
+Orçamentos
+
+Criação de orçamentos mensais por categoria.
+
+Gráfico circular ou barra de progresso mostrando quanto do orçamento foi usado.
+
+Cores dinâmicas conforme uso:
+
+0–70% → verde (#4CAF50)
+
+71–90% → amarelo (#FFC107)
+
+91–100% → vermelho (#F44336)
+
+Alertas visuais e notificações quando próximo do limite.
+
+Metas
+
+Criar metas financeiras (ex: economia mensal).
+
+Barra de progresso com cores dinâmicas como orçamentos.
+
+Notificação quando meta atingida ou próximo de atingir.
+
+Estatísticas
+
+Gráfico de barras: evolução dos gastos mês a mês.
+
+Linha temporal: gastos diários ou semanais.
+
+Gráfico de pizza: gastos por categoria.
+
+Tooltip mostrando valores em reais.
+
+Animações sutis: barras crescendo, linhas desenhando progressivamente.
+
+Categorias
+
+Lista de categorias com ícones.
+
+Possibilidade de criar novas categorias ou tags personalizadas.
+
+Cores consistentes para cada categoria (ex: Alimentação – laranja, Transporte – azul, Lazer – roxo).
+
+Exportação/Importação
+
+Exportar dados em CSV e PDF com resumo mensal.
+
+Importar planilhas externas para registrar transações.
+
+Resumo semanal
+
+Tela opcional mostrando saldo, gastos totais, comparativo com semana anterior.
+
+2. Design e UX
+
+Tema claro/escuro automático conforme sistema, com opção manual.
+
+Tipografia legível: fontes sans-serif, títulos em negrito, corpo do texto regular.
+
+Espaçamento consistente, margens e paddings uniformes.
+
+Botões e cartões com cantos arredondados (8–12px).
+
+Transições suaves entre telas e animações de elementos (fade-in, slide-in, barras crescendo).
+
+Botão “+” flutuante em todas as telas de lista para adicionar transações rapidamente.
+
+3. Orientações técnicas para gráficos
+
+Bibliotecas sugeridas
+
+Web/React: Chart.js, Recharts ou D3.js.
+
+Flutter: charts_flutter ou fl_chart.
+
+Exemplo de gráfico de pizza (despesas por categoria mensal):
+
+const data = {
+  labels: ['Alimentação', 'Transporte', 'Lazer', 'Contas'],
+  datasets: [{
+    data: [1200, 400, 600, 800],
+    backgroundColor: ['#FF9800', '#2196F3', '#9C27B0', '#F44336'],
+    hoverOffset: 10,
+  }],
+};
+
+
+Tooltip: mostra valor em reais (R$).
+
+Legend: ao lado do gráfico.
+
+Animação de entrada suave (1s).
+
+Exemplo de gráfico de barras (gastos mês a mês):
+
+const data = {
+  labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+  datasets: [{
+    label: 'Despesas',
+    data: [2000, 1800, 2200, 2100, 2300],
+    backgroundColor: '#F44336',
+  }, {
+    label: 'Receitas',
+    data: [3000, 3200, 3100, 3300, 3400],
+    backgroundColor: '#4CAF50',
+  }]
+};
+
+
+Eixos claros, grid leve.
+
+Tooltip mostra valor exato em reais.
+
+Barra de animação crescente.
+
+4. Experiência do usuário
+
+Tela inicial configurável: escolher ver saldo, gráficos ou estatísticas.
+
+Cheatsheets/tooltips para novos recursos.
+
+Alertas e notificações visuais e sonoras (opcional).
+
+Interações consistentes e responsivas: swipe, scroll suave, toque em cartões para detalhes.
+
+Responsividade: adaptação automática para desktop, tablet e mobile.

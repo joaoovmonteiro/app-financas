@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 11%, 7%);
+  --foreground: hsl(0, 0%, 100%);
+  --card: hsl(210, 11%, 12%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --popover: hsl(210, 11%, 12%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(263, 70%, 69%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(210, 11%, 15%);
+  --secondary-foreground: hsl(0, 0%, 70%);
+  --muted: hsl(210, 11%, 15%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(210, 11%, 15%);
+  --accent-foreground: hsl(263, 70%, 69%);
+  --destructive: hsl(4, 90%, 58%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 11%, 15%);
+  --input: hsl(210, 11%, 12%);
+  --ring: hsl(263, 70%, 69%);
+  --chart-1: hsl(263, 70%, 69%);
+  --chart-2: hsl(120, 61%, 50%);
+  --chart-3: hsl(37, 91%, 55%);
+  --chart-4: hsl(147, 79%, 42%);
+  --chart-5: hsl(341, 75%, 51%);
+  --sidebar: hsl(210, 11%, 12%);
+  --sidebar-foreground: hsl(0, 0%, 85%);
+  --sidebar-primary: hsl(263, 70%, 69%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 11%, 15%);
+  --sidebar-accent-foreground: hsl(263, 70%, 69%);
+  --sidebar-border: hsl(210, 11%, 15%);
+  --sidebar-ring: hsl(263, 70%, 69%);
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 0.75rem;
+  
+  /* Financial app specific colors */
+  --dark-primary: hsl(0, 0%, 7%);
+  --dark-surface: hsl(0, 0%, 12%);
+  --dark-surface-variant: hsl(0, 0%, 16%);
+  --balance-blue: hsl(207, 76%, 69%);
+  --income-green: hsl(122, 39%, 49%);
+  --expense-red: hsl(4, 90%, 58%);
+  --text-primary: hsl(0, 0%, 100%);
+  --text-secondary: hsl(0, 0%, 70%);
+  --accent-purple: hsl(263, 70%, 69%);
+  --warning-yellow: hsl(45, 93%, 47%);
+}
+
+.dark {
+  --background: hsl(210, 11%, 7%);
+  --foreground: hsl(0, 0%, 100%);
+  --card: hsl(210, 11%, 12%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --popover: hsl(210, 11%, 12%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(263, 70%, 69%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(210, 11%, 15%);
+  --secondary-foreground: hsl(0, 0%, 70%);
+  --muted: hsl(210, 11%, 15%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(210, 11%, 15%);
+  --accent-foreground: hsl(263, 70%, 69%);
+  --destructive: hsl(4, 90%, 58%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 11%, 15%);
+  --input: hsl(210, 11%, 12%);
+  --ring: hsl(263, 70%, 69%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    /* Fix for mobile devices to prevent content from being hidden by navigation bars */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  html {
+    @apply dark;
+    /* Ensure viewport doesn't scroll and respects safe areas */
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  }
+  
+  /* Mobile-specific adjustments */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-surface-variant) 100%);
+  }
+  
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .floating-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .nav-item.active {
+    color: var(--accent-purple);
+  }
+  
+  .nav-item.active svg {
+    stroke: var(--accent-purple);
+  }
+  
+  .nav-item:not(.active) {
+    color: var(--text-secondary);
+  }
+  
+  .nav-item:not(.active) svg {
+    stroke: var(--text-secondary);
+  }
+  
+  /* Mobile safe area handling */
+  .mobile-container {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  
+  /* Ensure content is visible and properly spaced */
+  .main-content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    min-height: calc(100vh - 120px);
+    min-height: calc(100dvh - 120px);
+  }
+  
+  /* APK specific fixes */
+  @media (display-mode: standalone) {
+    body {
+      padding-top: 0;
+    }
+    
+    .mobile-container {
+      padding-top: 0;
+    }
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

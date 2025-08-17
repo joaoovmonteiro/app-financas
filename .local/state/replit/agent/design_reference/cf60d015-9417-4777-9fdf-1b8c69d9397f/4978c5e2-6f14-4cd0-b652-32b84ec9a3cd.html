@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyControl - Controle Financeiro Pessoal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif'],
+                },
+                colors: {
+                    'dark-primary': '#121212',
+                    'dark-surface': '#1E1E1E',
+                    'dark-surface-variant': '#2A2A2A',
+                    'balance-blue': '#64B5F6',
+                    'income-green': '#4CAF50',
+                    'expense-red': '#F44336',
+                    'text-primary': '#FFFFFF',
+                    'text-secondary': '#B3B3B3',
+                    'accent-purple': '#BB86FC',
+                    'warning-yellow': '#FFC107',
+                }
+            }
+        },
+        darkMode: 'class',
+    };
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1E1E1E 0%, #2A2A2A 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .floating-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-dark-primary text-text-primary min-h-screen pb-20">
+    <!-- @COMPONENT: AppContainer [main application wrapper] -->
+    <div class="max-w-md mx-auto bg-dark-primary min-h-screen relative">
+        
+        <!-- @COMPONENT: HeaderBar [app header with profile] -->
+        <header class="p-4 gradient-bg border-b border-gray-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-accent-purple rounded-full flex items-center justify-center">
+                        <i data-feather="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold" data-bind="user.name">Olá, João</h1>
+                        <p class="text-text-secondary text-sm">Bom controle financeiro!</p>
+                    </div>
+                </div>
+                <button class="p-2 rounded-lg bg-dark-surface" data-event="click:toggleNotifications">
+                    <i data-feather="bell" class="w-5 h-5 text-text-secondary"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- @COMPONENT: MainContent [dynamic content area] -->
+        <main id="main-content" class="px-4 py-6 fade-in">
+            
+            <!-- Dashboard Content (Default View) -->
+            <div id="dashboard-content" class="space-y-6">
+                
+                <!-- @COMPONENT: BalanceCards [financial summary cards] -->
+                <div class="space-y-4">
+                    <!-- Saldo Total -->
+                    <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-text-secondary text-sm font-medium">Saldo Total</span>
+                            <i data-feather="eye" class="w-4 h-4 text-text-secondary"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-balance-blue mb-1" data-bind="balance.total">R$ 3.240,50</h2>
+                        <p class="text-text-secondary text-sm">
+                            <span class="text-income-green">+2.1%</span> desde último mês
+                        </p>
+                    </div>
+                    
+                    <!-- Receitas e Despesas -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-dark-surface p-4 rounded-2xl border border-gray-700">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <i data-feather="trending-up" class="w-4 h-4 text-income-green"></i>
+                                <span class="text-text-secondary text-sm">Receitas</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-income-green" data-bind="income.total">R$ 4.500,00</h3>
+                        </div>
+                        <div class="bg-dark-surface p-4 rounded-2xl border border-gray-700">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <i data-feather="trending-down" class="w-4 h-4 text-expense-red"></i>
+                                <span class="text-text-secondary text-sm">Despesas</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-expense-red" data-bind="expenses.total">R$ 1.259,50</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- @COMPONENT: ExpenseChart [pie chart for expenses vs income] -->
+                <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">Visão Geral do Mês</h3>
+                    <div class="flex items-center justify-center">
+                        <canvas id="overviewChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-income-green rounded-full"></div>
+                            <span class="text-sm text-text-secondary">Receitas (78.1%)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-expense-red rounded-full"></div>
+                            <span class="text-sm text-text-secondary">Despesas (21.9%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- @COMPONENT: RecentTransactions [last 5 transactions list] -->
+                <div class="bg-dark-surface rounded-2xl border border-gray-700">
+                    <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold">Últimas Transações</h3>
+                        <button class="text-accent-purple text-sm font-medium" data-event="click:navigateToTransactions">Ver todas</button>
+                    </div>
+                    <div class="divide-y divide-gray-700">
+                        <!-- @MAP: recentTransactions.map(transaction => ( -->
+                        <div class="p-4 flex items-center justify-between" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="coffee" class="w-5 h-5 text-orange-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-sm">Starbucks</h4>
+                                    <p class="text-text-secondary text-xs">Alimentação • Hoje</p>
+                                </div>
+                            </div>
+                            <span class="text-expense-red font-semibold">-R$ 15,90</span>
+                        </div>
+                        <div class="p-4 flex items-center justify-between" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="car" class="w-5 h-5 text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-sm">Uber</h4>
+                                    <p class="text-text-secondary text-xs">Transporte • Ontem</p>
+                                </div>
+                            </div>
+                            <span class="text-expense-red font-semibold">-R$ 23,40</span>
+                        </div>
+                        <div class="p-4 flex items-center justify-between" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-income-green/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="arrow-down-left" class="w-5 h-5 text-income-green"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-sm">Freelance</h4>
+                                    <p class="text-text-secondary text-xs">Receita • 2 dias</p>
+                                </div>
+                            </div>
+                            <span class="text-income-green font-semibold">+R$ 750,00</span>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Transactions Content -->
+            <div id="transactions-content" class="space-y-6 hidden">
+                <!-- @COMPONENT: TransactionSearch [search and filter bar] -->
+                <div class="space-y-4">
+                    <div class="relative">
+                        <i data-feather="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary"></i>
+                        <input type="text" placeholder="Buscar transações..." 
+                               class="w-full pl-10 pr-4 py-3 bg-dark-surface border border-gray-700 rounded-xl text-text-primary focus:border-accent-purple focus:ring-1 focus:ring-accent-purple">
+                    </div>
+                    <div class="flex space-x-3 overflow-x-auto pb-2">
+                        <button class="px-4 py-2 bg-accent-purple text-white rounded-full text-sm font-medium whitespace-nowrap">Todas</button>
+                        <button class="px-4 py-2 bg-dark-surface border border-gray-700 rounded-full text-sm font-medium whitespace-nowrap">Receitas</button>
+                        <button class="px-4 py-2 bg-dark-surface border border-gray-700 rounded-full text-sm font-medium whitespace-nowrap">Despesas</button>
+                        <button class="px-4 py-2 bg-dark-surface border border-gray-700 rounded-full text-sm font-medium whitespace-nowrap">Este mês</button>
+                    </div>
+                </div>
+
+                <!-- @COMPONENT: TransactionsList [paginated transactions] -->
+                <div class="space-y-4">
+                    <!-- @MAP: transactions.map(transaction => ( -->
+                    <div class="bg-dark-surface p-4 rounded-xl border border-gray-700" data-mock="true">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="coffee" class="w-6 h-6 text-orange-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Café da manhã</h4>
+                                    <p class="text-text-secondary text-sm">Padaria Central</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-expense-red font-bold text-lg">-R$ 12,50</span>
+                                <p class="text-text-secondary text-xs">10/12/2024</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-1 bg-orange-500/20 text-orange-500 text-xs rounded-full">Alimentação</span>
+                            <span class="px-2 py-1 bg-gray-700 text-text-secondary text-xs rounded-full">Café</span>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- Budgets Content -->
+            <div id="budgets-content" class="space-y-6 hidden">
+                <!-- @COMPONENT: BudgetOverview [monthly budget summary] -->
+                <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">Orçamento de Dezembro</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-text-secondary">Orçamento total</span>
+                            <span class="font-bold">R$ 2.000,00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-text-secondary">Gasto até agora</span>
+                            <span class="font-bold text-expense-red">R$ 1.259,50</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-text-secondary">Restante</span>
+                            <span class="font-bold text-income-green">R$ 740,50</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-xl">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i data-feather="lightbulb" class="w-4 h-4 text-accent-purple"></i>
+                            <span class="text-sm font-medium text-accent-purple">Dica inteligente</span>
+                        </div>
+                        <p class="text-sm text-text-secondary">Você pode gastar <span class="text-accent-purple font-semibold">R$ 37,03</span> por dia nos próximos <span class="text-accent-purple font-semibold">20 dias</span>.</p>
+                    </div>
+                </div>
+
+                <!-- @COMPONENT: CategoryBudgets [budget by category] -->
+                <div class="space-y-4">
+                    <!-- @MAP: budgets.map(budget => ( -->
+                    <div class="bg-dark-surface p-4 rounded-xl border border-gray-700" data-mock="true">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="coffee" class="w-5 h-5 text-orange-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Alimentação</h4>
+                                    <p class="text-text-secondary text-sm">R$ 320,00 de R$ 500,00</p>
+                                </div>
+                            </div>
+                            <span class="text-sm text-text-secondary">64%</span>
+                        </div>
+                        <div class="w-full bg-dark-primary rounded-full h-2">
+                            <div class="bg-income-green h-2 rounded-full" style="width: 64%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-dark-surface p-4 rounded-xl border border-gray-700" data-mock="true">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                    <i data-feather="car" class="w-5 h-5 text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Transporte</h4>
+                                    <p class="text-text-secondary text-sm">R$ 275,00 de R$ 300,00</p>
+                                </div>
+                            </div>
+                            <span class="text-sm text-text-secondary">92%</span>
+                        </div>
+                        <div class="w-full bg-dark-primary rounded-full h-2">
+                            <div class="bg-expense-red h-2 rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- Goals Content -->
+            <div id="goals-content" class="space-y-6 hidden">
+                <!-- @COMPONENT: GoalsList [financial goals with progress] -->
+                <div class="space-y-4">
+                    <!-- @MAP: goals.map(goal => ( -->
+                    <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700" data-mock="true">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold">Viagem para Europa</h3>
+                                <p class="text-text-secondary text-sm">Meta: R$ 8.000,00</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-accent-purple">R$ 3.200</span>
+                                <p class="text-text-secondary text-sm">40% atingido</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-dark-primary rounded-full h-3 mb-4">
+                            <div class="bg-accent-purple h-3 rounded-full relative" style="width: 40%">
+                                <div class="absolute right-0 top-0 w-3 h-3 bg-accent-purple rounded-full transform translate-x-1"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-text-secondary">Faltam R$ 4.800,00</span>
+                            <span class="text-accent-purple font-medium">15 meses restantes</span>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- Statistics Content -->
+            <div id="statistics-content" class="space-y-6 hidden">
+                <!-- @COMPONENT: StatsCharts [various statistical charts] -->
+                <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">Evolução Mensal</h3>
+                    <canvas id="monthlyChart" height="200"></canvas>
+                </div>
+
+                <div class="bg-dark-surface p-6 rounded-2xl border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">Gastos por Categoria</h3>
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+            </div>
+
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+
+        <!-- @COMPONENT: FloatingActionButton [quick transaction add] -->
+        <button id="fab" class="fixed bottom-24 right-6 w-14 h-14 bg-accent-purple rounded-full shadow-lg flex items-center justify-center floating-animation" 
+                data-event="click:addTransaction">
+            <i data-feather="plus" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <!-- @COMPONENT: BottomNavigation [main navigation bar] -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-dark-surface border-t border-gray-700">
+            <div class="max-w-md mx-auto px-6 py-3">
+                <div class="flex justify-between items-center">
+                    <button class="nav-item active flex flex-col items-center space-y-1 py-2" data-target="dashboard">
+                        <i data-feather="home" class="w-5 h-5"></i>
+                        <span class="text-xs font-medium">Início</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center space-y-1 py-2" data-target="transactions">
+                        <i data-feather="list" class="w-5 h-5"></i>
+                        <span class="text-xs font-medium">Transações</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center space-y-1 py-2" data-target="budgets">
+                        <i data-feather="pie-chart" class="w-5 h-5"></i>
+                        <span class="text-xs font-medium">Orçamentos</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center space-y-1 py-2" data-target="goals">
+                        <i data-feather="target" class="w-5 h-5"></i>
+                        <span class="text-xs font-medium">Metas</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center space-y-1 py-2" data-target="statistics">
+                        <i data-feather="bar-chart-2" class="w-5 h-5"></i>
+                        <span class="text-xs font-medium">Estatísticas</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+
+    </div>
+    <!-- @END_COMPONENT: AppContainer -->
+
+    <!-- @COMPONENT: AddTransactionModal [quick add transaction overlay] -->
+    <div id="transaction-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-dark-surface rounded-2xl p-6 w-full max-w-sm border border-gray-700">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold">Nova Transação</h3>
+                <button id="close-modal" class="p-1 rounded-lg hover:bg-gray-700">
+                    <i data-feather="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <!-- @FUNCTIONALITY: Transaction form with amount, category, description and date -->
+            <form class="space-y-4" data-implementation="Form should handle transaction creation">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Valor</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">R$</span>
+                        <input type="number" placeholder="0,00" 
+                               class="w-full pl-10 pr-4 py-3 bg-dark-primary border border-gray-700 rounded-xl text-text-primary focus:border-accent-purple focus:ring-1 focus:ring-accent-purple">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" class="px-4 py-3 bg-expense-red/20 border border-expense-red rounded-xl text-expense-red font-medium transaction-type" data-type="expense">
+                        <i data-feather="minus" class="w-4 h-4 inline mr-2"></i>Despesa
+                    </button>
+                    <button type="button" class="px-4 py-3 bg-dark-primary border border-gray-700 rounded-xl text-text-secondary font-medium transaction-type" data-type="income">
+                        <i data-feather="plus" class="w-4 h-4 inline mr-2"></i>Receita
+                    </button>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Categoria</label>
+                    <select class="w-full px-4 py-3 bg-dark-primary border border-gray-700 rounded-xl text-text-primary focus:border-accent-purple focus:ring-1 focus:ring-accent-purple">
+                        <option>Alimentação</option>
+                        <option>Transporte</option>
+                        <option>Lazer</option>
+                        <option>Contas</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Descrição</label>
+                    <input type="text" placeholder="Ex: Almoço no restaurante" 
+                           class="w-full px-4 py-3 bg-dark-primary border border-gray-700 rounded-xl text-text-primary focus:border-accent-purple focus:ring-1 focus:ring-accent-purple">
+                </div>
+                
+                <button type="submit" class="w-full py-3 bg-accent-purple text-white rounded-xl font-medium hover:bg-purple-600 transition-colors">
+                    Adicionar Transação
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AddTransactionModal -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        // Initialize Feather icons
+        feather.replace();
+
+        (function() {
+            // Navigation functionality
+            const navItems = document.querySelectorAll('.nav-item');
+            const contentSections = {
+                'dashboard': document.getElementById('dashboard-content'),
+                'transactions': document.getElementById('transactions-content'),
+                'budgets': document.getElementById('budgets-content'),
+                'goals': document.getElementById('goals-content'),
+                'statistics': document.getElementById('statistics-content')
+            };
+
+            // Navigation handler
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = item.dataset.target;
+                    
+                    // Update active nav item
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Show/hide content sections
+                    Object.keys(contentSections).forEach(key => {
+                        contentSections[key].classList.add('hidden');
+                    });
+                    
+                    if (contentSections[target]) {
+                        contentSections[target].classList.remove('hidden');
+                        contentSections[target].classList.add('fade-in');
+                    }
+                });
+            });
+
+            // Active navigation styling
+            const activeStyles = `
+                .nav-item.active {
+                    color: #BB86FC;
+                }
+                .nav-item.active svg {
+                    stroke: #BB86FC;
+                }
+                .nav-item:not(.active) {
+                    color: #B3B3B3;
+                }
+                .nav-item:not(.active) svg {
+                    stroke: #B3B3B3;
+                }
+            `;
+            const style = document.createElement('style');
+            style.textContent = activeStyles;
+            document.head.appendChild(style);
+
+            // Modal functionality
+            const fab = document.getElementById('fab');
+            const modal = document.getElementById('transaction-modal');
+            const closeModal = document.getElementById('close-modal');
+            const transactionTypes = document.querySelectorAll('.transaction-type');
+
+            fab.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            });
+
+            closeModal.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            // Transaction type toggle
+            transactionTypes.forEach(type => {
+                type.addEventListener('click', () => {
+                    transactionTypes.forEach(t => {
+                        t.classList.remove('bg-expense-red/20', 'border-expense-red', 'text-expense-red', 
+                                           'bg-income-green/20', 'border-income-green', 'text-income-green');
+                        t.classList.add('bg-dark-primary', 'border-gray-700', 'text-text-secondary');
+                    });
+                    
+                    if (type.dataset.type === 'expense') {
+                        type.classList.remove('bg-dark-primary', 'border-gray-700', 'text-text-secondary');
+                        type.classList.add('bg-expense-red/20', 'border-expense-red', 'text-expense-red');
+                    } else {
+                        type.classList.remove('bg-dark-primary', 'border-gray-700', 'text-text-secondary');
+                        type.classList.add('bg-income-green/20', 'border-income-green', 'text-income-green');
+                    }
+                });
+            });
+
+            // Initialize Charts
+            function initializeCharts() {
+                // Overview Chart (Pie Chart)
+                const overviewCtx = document.getElementById('overviewChart');
+                if (overviewCtx) {
+                    new Chart(overviewCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Receitas', 'Despesas'],
+                            datasets: [{
+                                data: [4500, 1259.50],
+                                backgroundColor: ['#4CAF50', '#F44336'],
+                                borderWidth: 0,
+                                cutout: '70%'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Monthly Chart (Line/Bar Chart)
+                const monthlyCtx = document.getElementById('monthlyChart');
+                if (monthlyCtx) {
+                    new Chart(monthlyCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                            datasets: [{
+                                label: 'Receitas',
+                                data: [3000, 3200, 3100, 3300, 3400, 4500],
+                                backgroundColor: '#4CAF50',
+                                borderRadius: 8
+                            }, {
+                                label: 'Despesas',
+                                data: [2000, 1800, 2200, 2100, 2300, 1259.50],
+                                backgroundColor: '#F44336',
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    ticks: { color: '#B3B3B3' },
+                                    grid: { color: '#2A2A2A' }
+                                },
+                                y: {
+                                    ticks: { color: '#B3B3B3' },
+                                    grid: { color: '#2A2A2A' }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: { color: '#FFFFFF' }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Category Chart (Pie Chart)
+                const categoryCtx = document.getElementById('categoryChart');
+                if (categoryCtx) {
+                    new Chart(categoryCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Alimentação', 'Transporte', 'Lazer', 'Contas'],
+                            datasets: [{
+                                data: [320, 275, 150, 200],
+                                backgroundColor: ['#FF9800', '#2196F3', '#9C27B0', '#F44336']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    labels: { color: '#FFFFFF' }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Initialize charts when statistics tab is clicked
+            navItems.forEach(item => {
+                if (item.dataset.target === 'statistics') {
+                    item.addEventListener('click', () => {
+                        setTimeout(initializeCharts, 100);
+                    });
+                }
+            });
+
+            // Initialize overview chart immediately (for dashboard)
+            setTimeout(() => {
+                const overviewCtx = document.getElementById('overviewChart');
+                if (overviewCtx) {
+                    new Chart(overviewCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Receitas', 'Despesas'],
+                            datasets: [{
+                                data: [4500, 1259.50],
+                                backgroundColor: ['#4CAF50', '#F44336'],
+                                borderWidth: 0,
+                                cutout: '70%'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+        })();
+    </script>
+</body>
+</html>
