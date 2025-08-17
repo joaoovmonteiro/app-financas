@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -28,6 +28,20 @@ function App() {
 
   // Enable keyboard dismissal on touch outside
   useKeyboardDismiss();
+
+  // Listen for fallback transaction modal events
+  useEffect(() => {
+    const handleOpenTransactionModal = () => {
+      console.log("Custom event received: openTransactionModal");
+      setEditingTransaction(null);
+      setIsTransactionModalOpen(true);
+    };
+
+    window.addEventListener('openTransactionModal', handleOpenTransactionModal);
+    return () => {
+      window.removeEventListener('openTransactionModal', handleOpenTransactionModal);
+    };
+  }, []);
 
   const handleEditTransaction = (transaction: Transaction) => {
     setEditingTransaction(transaction);

@@ -104,7 +104,15 @@ export function Transactions({ onEditTransaction, onAddTransaction }: Transactio
         <Button 
           onClick={() => {
             console.log("Nova Transação button clicked");
-            onAddTransaction();
+            console.log("onAddTransaction:", onAddTransaction);
+            if (onAddTransaction && typeof onAddTransaction === 'function') {
+              onAddTransaction();
+            } else {
+              console.error("onAddTransaction is not a function:", onAddTransaction);
+              // Fallback: trigger the modal directly if possible
+              const addTransactionEvent = new CustomEvent('openTransactionModal');
+              window.dispatchEvent(addTransactionEvent);
+            }
           }}
           className="bg-accent-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           data-testid="button-add-transaction-page"
