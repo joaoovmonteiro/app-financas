@@ -184,8 +184,8 @@ export function Budgets({ shouldOpenModal = false, onModalClose }: BudgetsProps)
           }
         }}>
           <DialogTrigger asChild>
-            <Button className="bg-accent-purple text-white" data-testid="button-create-budget">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button className="bg-accent-purple text-white px-6 py-3 text-lg font-semibold" data-testid="button-create-budget">
+              <Plus className="w-5 h-5 mr-3" />
               Novo Orçamento
             </Button>
           </DialogTrigger>

@@ -38,6 +38,10 @@ A comprehensive personal finance management application built with React, TypeSc
 ✓ **ENHANCED: Visual design** - Added gradients, shadows, and hover effects to all dropdown options
 ✓ **ADDED: Step-by-step category creation** - Split into Etapa 1 (nome) and Etapa 2 (ícone e cor)
 ✓ **INCREASED: Nova Transação emphasis** - Larger size, bold text, gradient background, and prominent positioning
+✓ **ADDED: Delete functionality** - Added delete buttons for both categories and budgets with confirmation
+✓ **MOVED: Smart tips to dashboard** - Removed general smart tip, moved to dashboard and individual budget cards
+✓ **ENLARGED: Novo Orçamento button** - Made button larger and more prominent on budget page
+✓ **CLEANED: Sample data** - Removed all sample transactions for clean app start with only default categories
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

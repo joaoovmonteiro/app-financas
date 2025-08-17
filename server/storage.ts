@@ -63,65 +63,7 @@ export class MemStorage implements IStorage {
     
     defaultCategories.forEach(cat => this.categories.set(cat.id, cat));
     
-    // Create sample transactions with current dates
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    const sampleTransactions: Transaction[] = [
-      {
-        id: "tx-1",
-        amount: "5000.00",
-        description: "Salário Mensal",
-        type: "income",
-        categoryId: "cat-5",
-        userId: "default-user",
-        date: new Date(currentYear, currentMonth, 1),
-        tags: null,
-      },
-      {
-        id: "tx-2",
-        amount: "1200.00",
-        description: "Supermercado mensal",
-        type: "expense",
-        categoryId: "cat-1",
-        userId: "default-user",
-        date: new Date(currentYear, currentMonth, 5),
-        tags: null,
-      },
-      {
-        id: "tx-3",
-        amount: "450.00",
-        description: "Uber e transporte",
-        type: "expense",
-        categoryId: "cat-2",
-        userId: "default-user",
-        date: new Date(currentYear, currentMonth, 10),
-        tags: null,
-      },
-      {
-        id: "tx-4",
-        amount: "300.00",
-        description: "Cinema e restaurantes",
-        type: "expense",
-        categoryId: "cat-3",
-        userId: "default-user",
-        date: new Date(currentYear, currentMonth, 15),
-        tags: null,
-      },
-      {
-        id: "tx-5",
-        amount: "800.00",
-        description: "Conta de luz e água",
-        type: "expense",
-        categoryId: "cat-4",
-        userId: "default-user",
-        date: new Date(currentYear, currentMonth, 20),
-        tags: null,
-      }
-    ];
-    
-    sampleTransactions.forEach(tx => this.transactions.set(tx.id, tx));
+    // No sample transactions - start with clean app
   }
 
   // Users
@@ -252,10 +194,6 @@ export class MemStorage implements IStorage {
     const updated = { ...budget, ...updates };
     this.budgets.set(id, updated);
     return updated;
-  }
-
-  async deleteBudget(id: string): Promise<boolean> {
-    return this.budgets.delete(id);
   }
 
   async deleteBudget(id: string): Promise<boolean> {
